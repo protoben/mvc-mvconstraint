@@ -4,10 +4,11 @@ Storyboard
 1. Examining the motion vectors in an MVC stream
   - *Inter* predicted vectors versus *inter-view* predicted vectors
   - Some graphs showing where both show up in unmodified JMVC (?)
-  - Why horizontal motion vectors make sense for *inter-view* slices and why
-    they aren't always used
+  - Why horizontal motion vectors make sense for *inter-view* slices
     + Views are horizontally correlated
+  - Why they aren't always used
     + Encoder stops when MV is "good enough"
+    + Occlusions (?)
   - Out-of-frame bug in unmodified JMVC
 2. Constraining motion vectors in all slice types
   - Speedup versus increased bitrate (graphs?)
