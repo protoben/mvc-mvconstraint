@@ -1,4 +1,4 @@
 MVC Motion Vector Constraint Project
 ====================================
 
-[Storyboard](storyboard.md)
+[Storyboard](/paper/storyboard.md)
