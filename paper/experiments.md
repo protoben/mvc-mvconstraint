@@ -8,8 +8,8 @@ we chose to constrain, along with the results of our experiments. Finally, we
 draw some conclusions about what method of constraint worked best in our
 experiments and quantify the benefits of our proposed system.
 
-Modifying JMVC
---------------
+JMVC
+----
 
 JMVC [\[1\]][schwarz10] is a fork of JM [\[2\]][suehring15], the H.264 reference
 coder. It implements the H.264 multiview extensions. This was the software we
@@ -49,6 +49,64 @@ constrain the search to within frame boundaries.
 
 Experimental Method
 -------------------
+
+Once we were able to inspect the motion information JMVC produced, we began
+running tests to determine what motion vectors it was finding for inter
+predicted and inter-view predicted pictures, respectively. In order to eliminate
+the noise that might arise from running tests on multiview footage from real
+cameras (the cameras might not be placed on a perfectly horizontal plane, for
+example), we ran our tests on a suite of 3d-rendered multiview videos.
+
+We further modified JMVC's search constraints so that we could selectively
+constrain the vertical component of the motion-vector search on some or all
+frames. We then tested the speed and rate-distortion efficiency &mdash; with and
+without vertical constraint &mdash; of three different view-dependency
+configurations.
+
+JMVC uses variable-bitrate encoding, so to quantify rate-distortion efficiency,
+it sufficed to record the bitrate of each frame and view. To record timing
+information, we used Linux's `time` utility to record the time each view took
+to encode. We additionally modified JMVC to record the time each frame took to
+encode using `clock_gettime()` with Linux's `CLOCK_MONOTONIC`.
+
+All our tests were run on [insert zodiac cluster hardware info here].
+
+View Dependencies
+-----------------
+
+For all of our reference views we used an intra-period of 4 with P-frames
+halfway between each pair of I-frames (i.e., a frame structure of
+`IBPBIBPB...`). We used a three different configurations for the dependent
+view, however.
+
+The standard allows frames in a dependent view to refer to concurrent frames
+from up to two other views or previous/subsequent frames within the same view
+for motion information. The most common configuration in the literature is shown
+in figure (a). In this configuration, each frame of a dependent view is coded
+with respect to the same numbered frame in the reference view, and each frame
+but the first is additionally uses inter prediction from the same view. In the
+remainder of this paper, we will refer to this as configuration A.
+
+We also tested a simpler scheme in which each frame of the dependent view uses
+only inter-view prediction from either one or two reference frames. This
+corresponds to figures (b) and (c). For the rest of this paper, these will be
+refered to as configurations B and C, respectively.
+
+<span align=center>
+[insert figure a: 2 views (0->1), with inter prediction on view 1]
+</span>
+
+<span align=center>
+[insert figure b: 2 views (0->1), with no inter prediction on view 1]
+</span>
+
+<span align=center>
+[insert figure c: 3 views (0->1<-2), with no inter prediction on view 1]
+</span>
+
+Without Vertical Constraint
+---------------------------
+
 
 
 [schwarz10]: references.md#schwarz10
