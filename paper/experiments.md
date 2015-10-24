@@ -76,7 +76,7 @@ View Dependencies
 
 For all of our reference views we used an intra-period of 4 with P-frames
 halfway between each pair of I-frames (i.e., a frame structure of
-`IBPBIBPB...`). We used a three different configurations for the dependent
+`IBPBIBPB...`). We used three different configurations for the dependent
 view, however.
 
 The standard allows frames in a dependent view to refer to concurrent frames
@@ -84,8 +84,9 @@ from up to two other views or previous/subsequent frames within the same view
 for motion information. The most common configuration in the literature is shown
 in figure (a). In this configuration, each frame of a dependent view is coded
 with respect to the same numbered frame in the reference view, and each frame
-but the first is additionally uses inter prediction from the same view. In the
-remainder of this paper, we will refer to this as configuration A.
+but the first is additionally uses inter prediction from the same
+view. [\[4\]][vetro11] In the remainder of this paper, we will refer to this as
+configuration A.
 
 We also tested a simpler scheme in which each frame of the dependent view uses
 only inter-view prediction from either one or two reference frames. This
@@ -107,7 +108,17 @@ refered to as configurations B and C, respectively.
 Without Vertical Constraint
 ---------------------------
 
+For each configuration, we ran tests with JMVC's stock configuration and
+examined the motion vectors it produced.
 
+Vertically Constraining All Frames
+----------------------------------
+
+Selective Vertical Constraints
+------------------------------
+
+Conclusion
+----------
 
 [schwarz10]: references.md#schwarz10
 [suehring15]: references.md#suehring15

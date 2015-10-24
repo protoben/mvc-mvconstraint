@@ -13,3 +13,8 @@ References
    coding," in Systems, Signals and Image Processing (IWSSIP),
    2012 19th International Conference on , vol., no., pp.388-391,
    11-13 April 2012
+4. <a label="vetro11"/>
+   Vetro, A.; Wiegand, T.; Sullivan, G.J.,
+   "Overview of the Stereo and Multiview Video Coding Extensions of the
+   H.264/MPEG-4 AVC Standard," in Proceedings of the IEEE,
+   vol.99, no.4, pp.626-642, April 2011
