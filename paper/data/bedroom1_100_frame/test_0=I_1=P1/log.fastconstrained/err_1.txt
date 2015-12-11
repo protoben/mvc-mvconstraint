@@ -1,0 +1,8 @@
+
+########
+######## Thu Dec 10 02:28:47 PST 2015
+readFrame failed in /home/hamlinb/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCEncoderLib/../../../../src/lib/H264AVCEncoderLib/Multiview.cpp:103.
+Abort.
+
+########
+######## Thu Dec 10 02:37:23 PST 2015

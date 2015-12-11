@@ -1,0 +1,5 @@
+
+########
+######## Sun Dec  6 13:16:08 PST 2015
+134.34user 0.71system 2:15.07elapsed 99%CPU (0avgtext+0avgdata 702432maxresident)k
+0inputs+0outputs (0major+50671minor)pagefaults 0swaps

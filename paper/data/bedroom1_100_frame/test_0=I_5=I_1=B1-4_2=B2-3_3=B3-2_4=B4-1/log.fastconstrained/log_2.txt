@@ -1,0 +1,157 @@
+
+########
+######## Mon Dec  7 10:18:42 ICT 2015
+JMVC 8.5 Encoder (running on a 64-bit system)
+
+SPS: num_views_minus_1: 5
+SPS: num_anchor_refs_l0[0]: 0
+SPS: num_anchor_refs_l1[0]: 0
+SPS: num_anchor_refs_l0[1]: 0
+SPS: num_anchor_refs_l1[1]: 0
+SPS: num_anchor_refs_l0[2]: 1
+SPS: anchor_ref_l0[2][0]: 0
+SPS: num_anchor_refs_l1[2]: 1
+SPS: anchor_ref_l1[2][0]: 5
+SPS: num_anchor_refs_l0[3]: 1
+SPS: anchor_ref_l0[3][0]: 0
+SPS: num_anchor_refs_l1[3]: 1
+SPS: anchor_ref_l1[3][0]: 5
+SPS: num_anchor_refs_l0[4]: 1
+SPS: anchor_ref_l0[4][0]: 0
+SPS: num_anchor_refs_l1[4]: 1
+SPS: anchor_ref_l1[4][0]: 5
+SPS: num_anchor_refs_l0[5]: 1
+SPS: anchor_ref_l0[5][0]: 0
+SPS: num_anchor_refs_l1[5]: 1
+SPS: anchor_ref_l1[5][0]: 5
+SPS: num_non_anchor_refs_l0[0]: 0
+SPS: num_non_anchor_refs_l1[0]: 0
+SPS: num_non_anchor_refs_l0[1]: 0
+SPS: num_non_anchor_refs_l1[1]: 0
+SPS: num_non_anchor_refs_l0[2]: 1
+SPS: non_anchor_ref_l0[2][0]: 0
+SPS: num_non_anchor_refs_l1[2]: 1
+SPS: non_anchor_ref_l1[2][0]: 5
+SPS: num_non_anchor_refs_l0[3]: 1
+SPS: non_anchor_ref_l0[3][0]: 0
+SPS: num_non_anchor_refs_l1[3]: 1
+SPS: non_anchor_ref_l1[3][0]: 5
+SPS: num_non_anchor_refs_l0[4]: 1
+SPS: non_anchor_ref_l0[4][0]: 0
+SPS: num_non_anchor_refs_l1[4]: 1
+SPS: non_anchor_ref_l1[4][0]: 5
+SPS: num_non_anchor_refs_l0[5]: 1
+SPS: non_anchor_ref_l0[5][0]: 0
+SPS: num_non_anchor_refs_l1[5]: 1
+SPS: non_anchor_ref_l1[5][0]: 5
+
+Initilizating parameters for NAL_UNIT_SPS...
+bAVCSPS=1 NumViews=1 Max_NumRefFrames=5 encDPBsize=-2147483644 decDPBSize=5 LevelIdc=31
+
+Initilizating parameters for NAL_UNIT_SUBSET_SPS...
+bAVCSPS=0 NumViews=6 Max_NumRefFrames=9 encDPBsize=-2147483640 decDPBSize=19 LevelIdc=42
+ViewCodingOrder: 0 5 1 2 3 4 
+   0 B IDR             0  QP 37  Y 33.7312 dB  U 37.4727 dB  V 37.3050 dB   bits   37400   secs   2.930507000
+   1 B REF             1  QP 37  Y 33.6830 dB  U 37.4978 dB  V 37.3194 dB   bits   36688   secs   2.933559000
+   2 B REF             2  QP 37  Y 33.5920 dB  U 37.5014 dB  V 37.3314 dB   bits   37760   secs   2.949063000
+   3 B REF             3  QP 37  Y 33.6967 dB  U 37.5468 dB  V 37.4851 dB   bits   36368   secs   2.974168000
+   4 B REF             4  QP 37  Y 33.6637 dB  U 37.5181 dB  V 37.3539 dB   bits   37584   secs   2.951957000
+   5 B REF             5  QP 37  Y 33.4859 dB  U 37.4711 dB  V 37.3899 dB   bits   38560   secs   2.949014000
+   6 B REF             6  QP 37  Y 33.5806 dB  U 37.5482 dB  V 37.4282 dB   bits   39224   secs   2.958253000
+   7 B REF             7  QP 37  Y 33.6585 dB  U 37.5805 dB  V 37.5317 dB   bits   35984   secs   2.977193000
+   8 B REF             8  QP 37  Y 33.6950 dB  U 37.4601 dB  V 37.3441 dB   bits   37568   secs   2.967157000
+   9 B REF             9  QP 37  Y 33.5166 dB  U 37.5114 dB  V 37.4086 dB   bits   38424   secs   2.936653000
+  10 B REF            10  QP 37  Y 33.6013 dB  U 37.5346 dB  V 37.4523 dB   bits   38536   secs   2.957670000
+  11 B REF            11  QP 37  Y 33.7160 dB  U 37.6916 dB  V 37.5950 dB   bits   37152   secs   2.975721000
+  12 B REF            12  QP 37  Y 33.7169 dB  U 37.5442 dB  V 37.3266 dB   bits   37944   secs   2.949692000
+  13 B REF            13  QP 37  Y 33.4905 dB  U 37.5953 dB  V 37.3862 dB   bits   39568   secs   2.957313000
+  14 B REF            14  QP 37  Y 33.5818 dB  U 37.6457 dB  V 37.4475 dB   bits   39056   secs   2.957988000
+  15 B REF            15  QP 37  Y 33.7013 dB  U 37.7131 dB  V 37.5784 dB   bits   37296   secs   2.953684000
+  16 B REF            16  QP 37  Y 33.7703 dB  U 37.5431 dB  V 37.3583 dB   bits   37264   secs   2.928916000
+  17 B REF            17  QP 37  Y 33.5180 dB  U 37.5762 dB  V 37.4592 dB   bits   39560   secs   2.931966000
+  18 B REF            18  QP 37  Y 33.6184 dB  U 37.6335 dB  V 37.5351 dB   bits   38160   secs   2.945749000
+  19 B REF            19  QP 37  Y 33.7347 dB  U 37.7364 dB  V 37.6973 dB   bits   36216   secs   2.945976000
+  20 B REF            20  QP 37  Y 33.7812 dB  U 37.6212 dB  V 37.4151 dB   bits   36768   secs   2.928539000
+  21 B REF            21  QP 37  Y 33.5619 dB  U 37.5966 dB  V 37.4703 dB   bits   39192   secs   2.946954000
+  22 B REF            22  QP 37  Y 33.6516 dB  U 37.7222 dB  V 37.5717 dB   bits   38680   secs   2.943739000
+  23 B REF            23  QP 37  Y 33.7390 dB  U 37.7403 dB  V 37.6624 dB   bits   36496   secs   2.956516000
+  24 B REF            24  QP 37  Y 33.8200 dB  U 37.5451 dB  V 37.3849 dB   bits   36392   secs   2.932064000
+  25 B REF            25  QP 37  Y 33.5770 dB  U 37.6324 dB  V 37.5031 dB   bits   38672   secs   2.942965000
+  26 B REF            26  QP 37  Y 33.6941 dB  U 37.7150 dB  V 37.5912 dB   bits   36712   secs   2.945557000
+  27 B REF            27  QP 37  Y 33.8126 dB  U 37.8082 dB  V 37.7543 dB   bits   35104   secs   2.945841000
+  28 B REF            28  QP 37  Y 33.8391 dB  U 37.6168 dB  V 37.4734 dB   bits   36376   secs   2.924920000
+  29 B REF            29  QP 37  Y 33.5928 dB  U 37.7010 dB  V 37.5530 dB   bits   38824   secs   2.944292000
+  30 B REF            30  QP 37  Y 33.7458 dB  U 37.7773 dB  V 37.6795 dB   bits   35736   secs   2.922807000
+  31 B REF            31  QP 37  Y 33.8946 dB  U 37.9058 dB  V 37.8074 dB   bits   35152   secs   2.911098000
+  32 B REF            32  QP 37  Y 33.8394 dB  U 37.7050 dB  V 37.4955 dB   bits   35296   secs   2.934392000
+  33 B REF            33  QP 37  Y 33.5970 dB  U 37.8015 dB  V 37.5886 dB   bits   38456   secs   2.947435000
+  34 B REF            34  QP 37  Y 33.7559 dB  U 37.8108 dB  V 37.6690 dB   bits   36720   secs   2.933155000
+  35 B REF            35  QP 37  Y 33.8626 dB  U 37.7847 dB  V 37.7529 dB   bits   35432   secs   2.942515000
+  36 B REF            36  QP 37  Y 33.8768 dB  U 37.6056 dB  V 37.4700 dB   bits   35680   secs   2.914937000
+  37 B REF            37  QP 37  Y 33.6697 dB  U 37.7098 dB  V 37.5758 dB   bits   37816   secs   2.920863000
+  38 B REF            38  QP 37  Y 33.7693 dB  U 37.7803 dB  V 37.6493 dB   bits   36640   secs   2.914018000
+  39 B REF            39  QP 37  Y 33.8656 dB  U 37.8357 dB  V 37.7934 dB   bits   35008   secs   2.921548000
+  40 B REF            40  QP 37  Y 33.8773 dB  U 37.6464 dB  V 37.5097 dB   bits   34960   secs   2.917417000
+  41 B REF            41  QP 37  Y 33.6889 dB  U 37.7465 dB  V 37.6493 dB   bits   37072   secs   2.936853000
+  42 B REF            42  QP 37  Y 33.7857 dB  U 37.7984 dB  V 37.6779 dB   bits   35584   secs   2.924658000
+  43 B REF            43  QP 37  Y 33.8968 dB  U 37.8721 dB  V 37.7685 dB   bits   34104   secs   2.909594000
+  44 B REF            44  QP 37  Y 33.9272 dB  U 37.6609 dB  V 37.4982 dB   bits   34408   secs   2.914032000
+  45 B REF            45  QP 37  Y 33.7180 dB  U 37.7853 dB  V 37.6393 dB   bits   37512   secs   2.915961000
+  46 B REF            46  QP 37  Y 33.8070 dB  U 37.7913 dB  V 37.6542 dB   bits   35728   secs   2.942004000
+  47 B REF            47  QP 37  Y 33.9161 dB  U 37.8816 dB  V 37.8740 dB   bits   33976   secs   2.916928000
+  48 B REF            48  QP 37  Y 33.9770 dB  U 37.7085 dB  V 37.5988 dB   bits   34624   secs   2.943190000
+  49 B REF            49  QP 37  Y 33.7601 dB  U 37.7388 dB  V 37.7049 dB   bits   37184   secs   2.925188000
+  50 B REF            50  QP 37  Y 33.9049 dB  U 37.8048 dB  V 37.7291 dB   bits   35800   secs   2.926253000
+  51 B REF            51  QP 37  Y 33.9952 dB  U 37.8622 dB  V 37.8322 dB   bits   34544   secs   2.932710000
+  52 B REF            52  QP 37  Y 34.0240 dB  U 37.7016 dB  V 37.5786 dB   bits   34272   secs   2.922461000
+  53 B REF            53  QP 37  Y 33.7833 dB  U 37.6859 dB  V 37.6678 dB   bits   36872   secs   2.905497000
+  54 B REF            54  QP 37  Y 33.9089 dB  U 37.7906 dB  V 37.7254 dB   bits   35216   secs   2.900024000
+  55 B REF            55  QP 37  Y 34.0117 dB  U 37.8862 dB  V 37.8105 dB   bits   34104   secs   2.905487000
+  56 B REF            56  QP 37  Y 34.0632 dB  U 37.6932 dB  V 37.5470 dB   bits   35112   secs   2.891613000
+  57 B REF            57  QP 37  Y 33.8184 dB  U 37.6930 dB  V 37.6044 dB   bits   35808   secs   2.911481000
+  58 B REF            58  QP 37  Y 34.0051 dB  U 37.8424 dB  V 37.6993 dB   bits   34544   secs   2.884767000
+  59 B REF            59  QP 37  Y 34.0758 dB  U 37.8995 dB  V 37.8110 dB   bits   33896   secs   2.924313000
+  60 B REF            60  QP 37  Y 34.1011 dB  U 37.6632 dB  V 37.5216 dB   bits   33016   secs   2.887749000
+  61 B REF            61  QP 37  Y 33.8815 dB  U 37.7447 dB  V 37.6371 dB   bits   35368   secs   2.877088000
+  62 B REF            62  QP 37  Y 33.9945 dB  U 37.7828 dB  V 37.6668 dB   bits   34248   secs   2.881040000
+  63 B REF            63  QP 37  Y 34.0965 dB  U 37.7907 dB  V 37.7964 dB   bits   32472   secs   2.890779000
+  64 B REF            64  QP 37  Y 34.1312 dB  U 37.6685 dB  V 37.5716 dB   bits   32568   secs   2.890448000
+  65 B REF            65  QP 37  Y 33.9025 dB  U 37.7090 dB  V 37.6318 dB   bits   34640   secs   2.880613000
+  66 B REF            66  QP 37  Y 34.0960 dB  U 37.8177 dB  V 37.6974 dB   bits   33176   secs   2.885940000
+  67 B REF            67  QP 37  Y 34.1517 dB  U 37.8798 dB  V 37.8023 dB   bits   32232   secs   2.880268000
+  68 B REF            68  QP 37  Y 34.1838 dB  U 37.6988 dB  V 37.5802 dB   bits   31720   secs   2.878869000
+  69 B REF            69  QP 37  Y 33.9364 dB  U 37.7435 dB  V 37.6509 dB   bits   33856   secs   2.910593000
+  70 B REF            70  QP 37  Y 34.1332 dB  U 37.8257 dB  V 37.7154 dB   bits   32352   secs   2.868298000
+  71 B REF            71  QP 37  Y 34.1476 dB  U 37.8828 dB  V 37.8290 dB   bits   31040   secs   2.904017000
+  72 B REF            72  QP 37  Y 34.2133 dB  U 37.6910 dB  V 37.6416 dB   bits   31184   secs   2.883572000
+  73 B REF            73  QP 37  Y 33.9896 dB  U 37.7601 dB  V 37.7010 dB   bits   33120   secs   2.893695000
+  74 B REF            74  QP 37  Y 34.1628 dB  U 37.8372 dB  V 37.7398 dB   bits   31608   secs   2.858295000
+  75 B REF            75  QP 37  Y 34.2793 dB  U 37.8702 dB  V 37.8837 dB   bits   29888   secs   2.847451000
+  76 B REF            76  QP 37  Y 34.2674 dB  U 37.7556 dB  V 37.6604 dB   bits   29456   secs   2.855566000
+  77 B REF            77  QP 37  Y 34.0141 dB  U 37.7722 dB  V 37.6850 dB   bits   32568   secs   2.857311000
+  78 B REF            78  QP 37  Y 34.1796 dB  U 37.7950 dB  V 37.7043 dB   bits   29496   secs   2.864061000
+  79 B REF            79  QP 37  Y 34.2120 dB  U 37.9138 dB  V 37.8922 dB   bits   29800   secs   2.867334000
+  80 B REF            80  QP 37  Y 34.2098 dB  U 37.6979 dB  V 37.5842 dB   bits   29424   secs   2.888604000
+  81 B REF            81  QP 37  Y 34.0082 dB  U 37.7620 dB  V 37.6630 dB   bits   31200   secs   2.875477000
+  82 B REF            82  QP 37  Y 34.1361 dB  U 37.7710 dB  V 37.6690 dB   bits   30680   secs   2.880167000
+  83 B REF            83  QP 37  Y 34.2735 dB  U 37.8441 dB  V 37.8022 dB   bits   29512   secs   2.841891000
+  84 B REF            84  QP 37  Y 34.2906 dB  U 37.6547 dB  V 37.5689 dB   bits   29256   secs   2.835357000
+  85 B REF            85  QP 37  Y 34.0660 dB  U 37.7253 dB  V 37.6478 dB   bits   31520   secs   2.869104000
+  86 B REF            86  QP 37  Y 34.2185 dB  U 37.7642 dB  V 37.6771 dB   bits   31192   secs   2.934326000
+  87 B REF            87  QP 37  Y 34.2774 dB  U 37.8049 dB  V 37.7907 dB   bits   28760   secs   2.925900000
+  88 B REF            88  QP 37  Y 34.2730 dB  U 37.6528 dB  V 37.5179 dB   bits   28608   secs   2.918811000
+  89 B REF            89  QP 37  Y 34.0311 dB  U 37.7018 dB  V 37.6389 dB   bits   31968   secs   2.911075000
+  90 B REF            90  QP 37  Y 34.1676 dB  U 37.7505 dB  V 37.6705 dB   bits   30672   secs   2.877088000
+  91 B REF            91  QP 37  Y 34.2927 dB  U 37.8040 dB  V 37.8384 dB   bits   29048   secs   2.906779000
+  92 B REF            92  QP 37  Y 34.2586 dB  U 37.6659 dB  V 37.6545 dB   bits   28096   secs   2.888155000
+  93 B REF            93  QP 37  Y 34.0728 dB  U 37.6646 dB  V 37.6759 dB   bits   29712   secs   2.890657000
+  94 B REF            94  QP 37  Y 34.1871 dB  U 37.7266 dB  V 37.7395 dB   bits   28528   secs   2.892310000
+  95 B REF            95  QP 37  Y 34.2717 dB  U 37.7456 dB  V 37.7976 dB   bits   28120   secs   2.871488000
+  96 B REF            96  QP 37  Y 34.2453 dB  U 37.5726 dB  V 37.5526 dB   bits   26912   secs   2.909717000
+  97 B REF            97  QP 37  Y 34.0535 dB  U 37.6282 dB  V 37.6108 dB   bits   30344   secs   2.885665000
+  98 B REF            98  QP 37  Y 34.1741 dB  U 37.6953 dB  V 37.6926 dB   bits   29208   secs   2.906793000
+
+    99 frames encoded:  Y 33.9114 dB  U 37.7117 dB  V 37.6159 dB
+
+     average bit rate:  859.5778 kbit/s  [425491 byte for 3.960 sec]
+

@@ -1,0 +1,11 @@
+
+########
+######## Thu Dec 10 02:28:38 PST 2015
+Command terminated by signal 2
+9.31user 0.07system 0:09.38elapsed 99%CPU (0avgtext+0avgdata 528032maxresident)k
+0inputs+0outputs (0major+39203minor)pagefaults 0swaps
+
+########
+######## Thu Dec 10 02:29:20 PST 2015
+481.33user 1.10system 8:02.50elapsed 99%CPU (0avgtext+0avgdata 1187712maxresident)k
+0inputs+0outputs (0major+501505minor)pagefaults 0swaps

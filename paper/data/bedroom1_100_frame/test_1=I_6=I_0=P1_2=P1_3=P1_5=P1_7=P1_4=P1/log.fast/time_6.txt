@@ -1,0 +1,5 @@
+
+########
+######## Mon Dec  7 22:02:05 ICT 2015
+502.23user 1.08system 8:23.41elapsed 99%CPU (0avgtext+0avgdata 2236256maxresident)k
+0inputs+0outputs (0major+362695minor)pagefaults 0swaps
