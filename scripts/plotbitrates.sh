@@ -70,7 +70,7 @@ END {
 [[ "`cat $UNITMPFILE`" ]] &&
 gnuplot << END
 unset key
-set terminal pdfcairo size 3.5in,1.5in font 'serif,10'
+set terminal pdfcairo size 3.5in,2.4in font 'serif,10'
 set output "${DATFILE%.dat}_unidirectional.pdf"
 set title "Bitrates by distance from reference view\nUnidirectional references"
 set xlabel "Reference view distance"
@@ -86,11 +86,11 @@ END
 [[ "`cat $BITMPFILE`" ]] &&
 gnuplot << END
 unset key
-set terminal pdfcairo size 5in,1.5in font 'serif,10'
+set terminal pdfcairo size 5in,2.4in font 'serif,10'
 set output "${DATFILE%.dat}_bidirectional.pdf"
 set title "Bitrates by distance from reference view\nBidirectional references"
 set xlabel "Reference view distances"
-set yrange [0:200]
+set yrange [0:150]
 set arrow from graph 0,first 100 to graph 1,first 100 nohead lc rgb "#000000" front
 set ylabel "Bitrate\n% of avg. independent view"
 set grid
