@@ -2,6 +2,7 @@
 \usepackage{paralist}
 \usepackage{tikz}
 \usepackage{float}
+\usepackage{dblfloatfix}
 \usepackage{graphicx}
 \usepackage[font=small,labelfont=bf]{caption}
 \usepackage{subcaption}
@@ -38,13 +39,15 @@ stereoscopic video, among other applications. However, encoding multiple
 views into one stream compounds the size and computation overhead of
 traditional video coding. Because of this, there is a need to come up with new
 ways to improve the space-time trade-off inherent in motion compensation
-specialized for multiview. In this paper, we present a systematic analysis of
-the trade-offs between computation time and bit-rate with respect to inter-view
-motion compensation. In addition, we propose a method of constraining inter-view
-motion-vector search that leverages the relationship between views to speed up
-search times by a factor of two for views with one reference and a factor of
-four for views with two references, compared to using a modern fast search
-algorithm alone, with at most a small increase in bit-rate.
+specialized for multiview. In this paper, we present and evaluate a simple
+method to reduce the time-overhead of inter-view motion compensation by
+constraining the search space vertically, leveraging knowledge of the
+relationship between views. We show that this technique, which is
+complementary to existing approaches, reduces the time taken by inter-view
+motion compensation by a factor of two for views with one reference and a factor
+of four for views with two references, with at most a small increase in
+bit-rate. In addition, we provide an experimental analysis of view-dependency
+structures in multiview video.
 \end{abstract}
 
 \begin{CCSXML}
@@ -77,96 +80,64 @@ more expensive to transport or store multiple viewpoints than it is to transport
 or store just one. Fortunately, since all the cameras are focused on the same
 scene there is some inter-view redundancy, which can be taken advantage of such
 that the combined views can be encoded more efficiently together than they could
-be individually.
+be individually. The mechanism used to exploit inter-picture redundancy in
+ITU/ISO H.264/MPEG4 AVC and Annex H, its multiview extension, is block-based
+motion compensation. The most expensive aspect of this is motion-vector search,
+and a variety of algorithms for it exist, many of which acheive impressive
+results (a survey of existing algorithms is presented in \cite{khattak:fast}).
 
-The mechanism commonly used to exploit inter-picture redundancy -- most
-pertinently, in ITU/ISO H.264/MPEG4 AVC and Annex H, its multiview extension
--- is block-based motion compensation. This allows some pictures to be stored
-with reference to one or two other pictures. Each block of the dependent
-picture can optionally be stored as a spatial offset, at quarter-pixel
-resolution, to a similar block in the reference picture, and a frequency-domain
-difference between the dependent and reference blocks.
+The novel approach we explore in this paper uses knowledge about the constrained
+set of ways in which the pictures (in this case, the views) can differ from each
+other in order to narrow down the possibilities before searching. Specifically,
+in the common case for multiview, the cameras shooting the different views are
+located in the same horizontal plane. This means that objects that are
+non-occluded in both views will have different x-coordinates, but should not
+have different y-coordinates. Thus we propose constraining the inter-view
+motion-vector search to consider only horizontal motion-vector offsets, not
+vertical ones.
 
-With this technique, the encoder can reduce inter-view redundancy and save
-space but at the cost of spending time searching the reference pictures for
-similar blocks. In general, increasing the search space decreases the resulting
-bit-rate, but takes more time. It is reasonable then, to ask what the best
-trade-off is between time and efficiency. A variety of algorithms exist to
-decrease the subset of blocks to search, many of which have achieved
-impressive results (a survey of several existing algorithms, as well as two
-novel ones, is presented in \cite{khattak:fast}). In general, these take a
-divide-and-conquer approach, searching in a fixed set of locations around
-some center point at progressively finer granularities.
-
-Another approach -- the one we explore in this paper -- would be to use
-knowledge about the constrained set of ways in which the pictures (in this
-case, the views) can differ from each other in order to narrow down the
-possibilities before searching. Specifically, in the common case for
-multiview, the cameras shooting the different views are located in the same
-horizontal plane. This means that objects that are non-occluded in both
-views will have different x-coordinates, but should not have different
-y-coordinates. We propose constraining the inter-view motion-vector search to
-consider only horizontal motion-vector offsets, not vertical ones. Note that
-this is complementary to existing motion-vector search algorithms. In our
-experiments, this produced approximately a two-times speedup for views with
-one reference and about a four-times speedup for views with two references,
-over using a fast search algorithm alone, while incurring between $0\%$ and
-$7\%$ increase in bit-rate depending on the content of the video.
-
-In addition, the structure of the view dependencies can have a profound effect
-on the efficiency with which the dependent views are coded. For example, we
-found in our experiments that, with equal spacing between views, a view that
-depended on a reference two views away took up nearly twice as much space on
-average as one whose reference was only one view away. Perhaps more
-surprisingly still, when a view's reference was five views away it actually
-had a higher bit-rate than the average independent view, which means that
-encoding a view in this way is never worthwhile. An ideal view dependency
-structure would never make a view depend on a reference more than one view
-away. If the number of views is large, however, this could require that views
-be made hierarchical. But in stereoscopic video, for example, it may be
-desirable to separate out just two views to transport, and having hierarchical
-view dependencies makes this expensive.
+Although the technique we propose is simple, it is an approach that has not, to
+our knowledge, been examined in the literature, and it is not implemented in any
+of the encoders we examined. Thus we feel that it is reasonable to ask whether
+intuition -- that vertical constraint will reduce computation time without
+significantly impacting quality or bit rate -- is borne out. We do so in this
+paper, supporting our claim with experimental evidence. Our experiments produced
+approximately a two-times speedup for views with one reference and about a
+four-times speedup for views with two references, over using a fast search
+algorithm alone, while incurring between $0\%$ and $7\%$ increase in bit-rate
+depending on the content of the video.
 
 The contributions of this work are twofold: \begin{compactitem}
+\item We introduce the idea of vertical search constraints for inter-view
+motion vectors and provide experimental data that demonstrates the kinds of
+speedups and bit-rates it can achieve.
 \item We present experimental data on the time taken and bit-rates achieved by a
 variety of view-dependency structures, arriving at a suggestion for an optimal
 8-view dependency structure and an intuition about in which cases unidirectional
-and bidirectional inter-view dependencies are useful.
-\item We introduce the idea of vertical search constraints for inter-view motion
-vectors and provide experimental data that demonstrates the kinds of speedups
-and bit-rates it can achieve. \end{compactitem} To our knowledge, this is the
-first paper to explore vertically constraining inter-view motion compensation.
-It is also the first to provide a systematic analysis of the time and bit-rates
-required by various view structures under H.264 Annex H, and to  characterize
-them according to their distance from their reference views (although
-\cite{merkle:efficient} gives an excellent characterization of the relative
-efficiencies of inter and inter-view motion compensation in general). In
-performing our experiments, we additionally identified a bug in JMVC, the
-H.264 MVC reference codec \cite{schwarz:jmvc}, which we have reported to the
-project's maintainers.
+and bidirectional inter-view dependencies are useful. \end{compactitem} To our
+knowledge, this is the first paper to explore vertically constraining inter-view
+motion compensation. For a summary of previous work on establishing optimal
+view-dependency structures, the reader is refered to \cite{merkle:efficient}.
 
-The remainder of this paper is organized as follows: Section
-\ref{sec:background} provides some background information on multiview coding.
-We describe our results and the methods we used to obtain them in sections
-\ref{sec:results} and \ref{sec:method}, respectively. Finally, in section
-\ref{sec:conclusion} conclude the paper.
+The remainder of this paper is organized as follows: In section
+\ref{sec:algorithm} we discuss how we implemented vertical motion vector
+constraint. We describe our results and the experimental methods we used to
+obtain them in sections \ref{sec:results} and \ref{sec:method}, respectively.
+Finally, in section \ref{sec:conclusion} we conclude the paper.
 
-\section{Background} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{sec:background} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-In this section, we describe two of the key features of multiview coding that
-we refer to in the remainder of the paper. In \ref{subsec:motion} we cover
-motion compensation and how it is used in the base H.264 standard and in MVC.
+\section{Algorithm} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:algorithm} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In this section, we describe our proposed technique for reducing the time taken
+by inter-view motion compensation. In \ref{subsec:background} we describe motion
+compensation and how it is used in the base H.264 standard and in MVC.
 We restrict ourselves to discussing those aspects of inter-view motion
 compensation that are relevant to the rest of our paper. For a more thorough
 treatment of the advanced features of motion compensation in H.264 MVC, we
-direct the reader to \cite{vetro:overview}. In \ref{subsec:depends}, we discuss
-frame and view dependency structures for motion compensation and describe some
-of the things that must  be taken into account when deciding what structures to
-use.
+direct the reader to \cite{vetro:overview}. In \ref{subsec:constraining}, we
+describe and motivate our technique for vertical search constraints.
 
 \subsection{Motion Compensation}
-\label{subsec:motion}
+\label{subsec:background}
 
 Block-based motion compensation is a technique for reducing redundancies in two
 pictures by encoding some or all of one with reference to the other. H.264 uses
@@ -175,67 +146,40 @@ into blocks of varying sizes, each of which is transformed into the frequency
 domain and stored as a set of coefficients to horizontally and vertically
 oriented sinusoidal functions. These coefficients can then be quantized
 to reduce the image's quality in ways that are difficult for the human eye to
-perceive. H.264 uses block sizes of $16\times 16$, $16\times 8$,
-$8\times 16$, $8\times 8$, $4\times 8$, $8\times 4$, or $4\times 4$. Breaking
-images into blocks in this way lends itself naturally to block-wise encoding
-of inter-picture similarities.
+perceive.
 
-Once the block sizes have been chosen based on the content of each
-$16\times 16$ macroblock, the reference picture is searched for similar
-blocks of the same size at quarter-pixel resolution. If two reference
-pictures are present, the encoder searches both individually, then searches
-for pairs of blocks, one from each picture, that produce a block similar to
-the dependent one when averaged.
+Once the block sizes have been chosen for a dependent picture, the reference
+picture is searched for similar blocks of the same size at quarter-pixel
+resolution. If two reference pictures are present, the encoder searches both
+individually, then searches for pairs of blocks, one from each picture, that
+produce a block similar to the dependent one when averaged. If a suitable block
+is found, it is encoded as the spatial offset (in quarter-pixels) from the
+dependent block to the reference block (a {\it motion vector}). The encoder then
+takes the frequency-domain coefficient-wise difference between the two (the
+{\it residual}) and encodes it along with the motion vector. The encoder may
+also independently code blocks for which no match is found or {\it skip} blocks
+that are identical to the reference picture.
 
-The encoder has two other options for each macroblock, as well. If no
-suitable motion vector is found, it can choose to independently encode the
-blocks of the macroblock in the same way they would be encoded in an
-independent picture. Alternatively, if the macroblock is identical to the
-spatially corresponding one in the reference picture, it can be
-{\it skipped}, meaning the decoder will just take it directly from the
-reference picture.
+Note that the standard does not specify how the search for motion vectors should
+occur, only how the result should be encoded. Since it is generally the most
+time-consuming part of the video coding process, encoders use a number of
+methods to narrow down the search space. The first and most obvious is to limit
+the search radius. Another approach (called {\it raster search}) is to reduce
+the resolution of the search, so that only one block is searched per fixed-size
+neighborhood. A third approach is to search in a fixed pattern (usually a
+square, diamond, pentagon, hexagon, etc.) around a center point. The point
+chosen becomes the new center, and the search is repeated with a decreased
+radius, until at some point, the search finishes with a quarter-pixel full
+search of some small area.
 
-If a suitable block is found, it is encoded as the spatial offset (in
-quarter-pixels) from the dependent block to the reference block (a
-{\it motion vector}). The encoder then takes the frequency-domain
-coefficient-wise difference between the two (the {\it residual}) and encodes
-it along with the motion vector. Since the two blocks are similar, these
-coefficient differences should be small, allowing them to frequently be
-quantized down to zero and efficiently compressed using run-length encoding.
-If two reference pictures are present, both motion vectors are stored, and
-the residual is the difference between each dependent coefficient and the
-average of each pair of reference coefficients.
+\subsection{Vertical Constraint} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{subsec:constraining} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Note that the standard does not specify how this search should occur, only
-how the result should be encoded. One approach would be to do an exhaustive
-search of all possible reference blocks and reference block combinations. In
-the worst case, this involves $B \times Q$ comparisons per picture with one
-reference, and $2(B \times Q) + B \times Q^2$ comparisons with two (where
-$Q = 4(W\times H)$ is the number of quarter pixels in the image and $B$ is
-the number of blocks, of varying size).
-
-This search is generally the most time-consuming part of the video coding
-process, so encoders usually take a number of measures to narrow down the
-search space. The first and most obvious step is to limit the search radius.
-Thus encoders usually specify a square around the original block to search
-(e.g., $64\times 64$ pixels). Another approach (called {\it raster search})
-is to reduce the resolution of the search, so that only one block is searched
-in a fixed-size neighborhood. A third approach is to search in a fixed
-pattern (usually a square, diamond, pentagon, hexagon, etc.) around a center
-point. The point chosen becomes the new center, and the search is repeated
-with a decreased radius, until at some point, the search finishes with a
-quarter-pixel full search of some small area.
-
-These approaches assume that the best reference block is most likely to be
+The above approaches assume that the best reference block is most likely to be
 within a small area around the dependent block. This assumption is reasonable
 in the case of motion compensation in the base H.264 standard, where reference
 pictures are temporally offset by one or a few frames within the same video
-stream ({\it inter} coding). Since a smoothly moving object is only likely to
-travel a small number of pixels between frames, the new block containing it is
-likely to be close to the old one. Of course, motion vectors aren't limited to
-encoding actual motion. They can also encode visual similarities between blocks
-whose content is unrelated, meaning that the best reference block is sometimes
-distant from the dependent block.
+stream ({\it inter} coding).
 
 Stronger assertions can be made when using motion compensation to encode
 temporally corresponding pictures within different views ({\it inter view}
@@ -243,266 +187,34 @@ coding). Assuming the views are being used for stereoscopic or free-viewpoint
 video, objects shared between views always lie within the same horizontal plane.
 In addition pictures from different views are always correlated. They are not
 subject, for example, to being separated by scene changes. The only case in
-which an object can be in one view but not in another is when it is occluded. It
-is this insight that leads us to propose vertically constraining motion-vector
-search.
+which an object can be in one view but not in another is when it is occluded or
+too skewed to be visually similar. It is this insight that leads us to propose
+vertically constraining motion-vector search.
 
-\subsection{View-Dependency Structures}
-\label{subsec:depends}
-In order to take advantage of spatial redundancy using inter-view motion
-compensation, the encoder needs to make a number of choices. It needs to
-decide which views will be independent and which will not. Then for each
-dependent view, it must determine whether that view should have one reference
-or two, and which views those references should be. Note that it's usually
-the user who actually makes this choice, not the encoder software. In
-general, independent views are the least time-consuming\footnote{See section
-\ref{subsec:optimal} for a caveat.}, but take up the most space,
-bidirectionally coded views take up the least space but take the most time,
-and unidirectionally coded views are in the middle.
+Our modifications to the encoding process are made quite simple by the fact that
+practically every encoder already constrains the neighborhood in which motion
+vectors are searched for. They typically specify a square around the original
+block to search (e.g., $64\times 64$ pixels). Their search algorithm is usually
+idenrical for inter and inter-view search. Our modification requires the encoder
+to distinguish between the two types of motion compensation and, in the latter
+case, reduce this neighborhood in the y-direction (e.g. to $64\times 1$ pixels).
 
-Within a view, pictures are organized into groups (GOPs), which consist of a
-set of pictures that can be decoded on their own, without reference to
-previous pictures from the same view \cite{vetro:overview}. An example of
-this is given in Figure \ref{fig:inter}, where the GOP-size is 4.
-
-\begin{figure}[H]
-\begin{center}
-\begin{tikzpicture}[scale=0.75,every path/.style={>=latex},every node/.style={draw,rectangle}]
-\node            (a) at (0,0)  { I };
-\node            (b) at (1,0)  { B };
-\node            (c) at (2,0)  { P };
-\node            (d) at (3,0)  { B };
-\node            (e) at (4,0)  { I };
-\node            (f) at (5,0)  { B };
-\node            (g) at (6,0)  { P };
-\node            (h) at (7,0)  { B };
-\node            (i) at (8,0)  { I };
-\node[draw=none]     at (9,0)  { ... };
-\draw[->]            (a) edge (b);
-\draw[->]            (c) edge (b);
-\draw[->, bend left] (a) edge (c);
-\draw[->]            (c) edge (d);
-\draw[->]            (e) edge (d);
-\draw[->]            (e) edge (f);
-\draw[->]            (g) edge (f);
-\draw[->, bend left] (e) edge (g);
-\draw[->]            (g) edge (h);
-\draw[->]            (i) edge (h);
-\end{tikzpicture}
-\end{center}
-\caption{
-A typical inter-coding structure with GOP size 4. Arrows point from the
-reference to the dependent picture.
-}
-\label{fig:inter}
-\end{figure}
-
-In dependent views, it is common for every picture to have at least one
-inter-view reference and every picture but the first to additionally be
-inter-coded (\cite{khattak:fast}, \cite{vetro:overview}, e.g.). An example is
-given in Figure \ref{fig:inter-view}. This allows the encoder to take
-advantage of both spatial and temporal redundancies in a dependent view.
-
-\begin{figure}[H]
-\begin{center}
-\begin{tikzpicture}[scale=0.75,every path/.style={>=latex},every node/.style={draw,rectangle}]
-\node[draw=none]      at (-1,0) { View 0 };
-\node            (a0) at (0,0)  { I };
-\node            (b0) at (1,0)  { B };
-\node            (c0) at (2,0)  { P };
-\node            (d0) at (3,0)  { B };
-\node            (e0) at (4,0)  { I };
-\node            (f0) at (5,0)  { B };
-\node            (g0) at (6,0)  { P };
-\node            (h0) at (7,0)  { B };
-\node            (i0) at (8,0)  { I };
-\node[draw=none]      at (9,0)  { ... };
-\node[draw=none]      at (-1,1) { View 1 };
-\node            (a1) at (0,1)  { B };
-\node            (b1) at (1,1)  { B };
-\node            (c1) at (2,1)  { B };
-\node            (d1) at (3,1)  { B };
-\node            (e1) at (4,1)  { B };
-\node            (f1) at (5,1)  { B };
-\node            (g1) at (6,1)  { B };
-\node            (h1) at (7,1)  { B };
-\node            (i1) at (8,1)  { B };
-\node[draw=none]      at (9,1)  { ... };
-\node[draw=none]      at (-1,2) { View 2 };
-\node            (a2) at (0,2)  { I };
-\node            (b2) at (1,2)  { B };
-\node            (c2) at (2,2)  { P };
-\node            (d2) at (3,2)  { B };
-\node            (e2) at (4,2)  { I };
-\node            (f2) at (5,2)  { B };
-\node            (g2) at (6,2)  { P };
-\node            (h2) at (7,2)  { B };
-\node            (i2) at (8,2)  { I };
-\node[draw=none]      at (9,2)  { ... };
-\draw[->]             (a0) edge (b0);
-\draw[->]             (c0) edge (b0);
-\draw[->, bend right] (a0) edge (c0);
-\draw[->]             (c0) edge (d0);
-\draw[->]             (e0) edge (d0);
-\draw[->]             (e0) edge (f0);
-\draw[->]             (g0) edge (f0);
-\draw[->, bend right] (e0) edge (g0);
-\draw[->]             (g0) edge (h0);
-\draw[->]             (i0) edge (h0);
-\draw[->]             (a0) edge (a1);
-\draw[->]             (b0) edge (b1);
-\draw[->]             (c0) edge (c1);
-\draw[->]             (d0) edge (d1);
-\draw[->]             (e0) edge (e1);
-\draw[->]             (f0) edge (f1);
-\draw[->]             (g0) edge (g1);
-\draw[->]             (h0) edge (h1);
-\draw[->]             (i0) edge (i1);
-\draw[->]             (a1) edge (b1);
-\draw[->]             (b1) edge (c1);
-\draw[->]             (c1) edge (d1);
-\draw[->]             (d1) edge (e1);
-\draw[->]             (e1) edge (f1);
-\draw[->]             (f1) edge (g1);
-\draw[->]             (g1) edge (h1);
-\draw[->]             (h1) edge (i1);
-\draw[->]             (a2) edge (a1);
-\draw[->]             (b2) edge (b1);
-\draw[->]             (c2) edge (c1);
-\draw[->]             (d2) edge (d1);
-\draw[->]             (e2) edge (e1);
-\draw[->]             (f2) edge (f1);
-\draw[->]             (g2) edge (g1);
-\draw[->]             (h2) edge (h1);
-\draw[->]             (i2) edge (i1);
-\draw[->]             (a2) edge (b2);
-\draw[->]             (c2) edge (b2);
-\draw[->, bend left]  (a2) edge (c2);
-\draw[->]             (c2) edge (d2);
-\draw[->]             (e2) edge (d2);
-\draw[->]             (e2) edge (f2);
-\draw[->]             (g2) edge (f2);
-\draw[->, bend left]  (e2) edge (g2);
-\draw[->]             (g2) edge (h2);
-\draw[->]             (i2) edge (h2);
-\end{tikzpicture}
-\end{center}
-\caption{
-A typical view-internal coding structure with both dependent and reference
-pictures. Pictures are both inter-coded and inter-view coded.
-}
-\label{fig:inter-view}
-\end{figure}
-
-In our tests, we chose to do away with the inter-coding in dependent views. We
-did this for two reasons. First, the JMVC reference codec does not support
-pictures that are both inter and inter-view coded in any configurable way.
-Instead, it uses the same GOP structure for both dependent and reference views,
-with inter-view coded pictures in place of I-frames. More importantly, however,
-doing away with inter-coding in the dependent views allows us to isolate the
-coding efficiency achieved by inter-view coding alone, without having to worry
-about the noise introduced by variable temporal redundancy. For the rest of the
-paper, we assume that all dependent and independent views have internal
-structures as shown in Figure \ref{fig:just-inter-view}.
-
-\begin{figure}[H]
-\begin{center}
-\begin{tikzpicture}[scale=0.75,every path/.style={>=latex},every node/.style={draw,rectangle}]
-\node[draw=none]      at (-1,0) { View 0 };
-\node            (a0) at (0,0)  { I };
-\node            (b0) at (1,0)  { B };
-\node            (c0) at (2,0)  { P };
-\node            (d0) at (3,0)  { B };
-\node            (e0) at (4,0)  { I };
-\node            (f0) at (5,0)  { B };
-\node            (g0) at (6,0)  { P };
-\node            (h0) at (7,0)  { B };
-\node            (i0) at (8,0)  { I };
-\node[draw=none]      at (9,0)  { ... };
-\node[draw=none]      at (-1,1) { View 1 };
-\node            (a1) at (0,1)  { B };
-\node            (b1) at (1,1)  { B };
-\node            (c1) at (2,1)  { B };
-\node            (d1) at (3,1)  { B };
-\node            (e1) at (4,1)  { B };
-\node            (f1) at (5,1)  { B };
-\node            (g1) at (6,1)  { B };
-\node            (h1) at (7,1)  { B };
-\node            (i1) at (8,1)  { B };
-\node[draw=none]      at (9,1)  { ... };
-\node[draw=none]      at (-1,2) { View 2 };
-\node            (a2) at (0,2)  { I };
-\node            (b2) at (1,2)  { B };
-\node            (c2) at (2,2)  { P };
-\node            (d2) at (3,2)  { B };
-\node            (e2) at (4,2)  { I };
-\node            (f2) at (5,2)  { B };
-\node            (g2) at (6,2)  { P };
-\node            (h2) at (7,2)  { B };
-\node            (i2) at (8,2)  { I };
-\node[draw=none]      at (9,2)  { ... };
-\draw[->]             (a0) edge (b0);
-\draw[->]             (c0) edge (b0);
-\draw[->, bend right] (a0) edge (c0);
-\draw[->]             (c0) edge (d0);
-\draw[->]             (e0) edge (d0);
-\draw[->]             (e0) edge (f0);
-\draw[->]             (g0) edge (f0);
-\draw[->, bend right] (e0) edge (g0);
-\draw[->]             (g0) edge (h0);
-\draw[->]             (i0) edge (h0);
-\draw[->]             (a0) edge (a1);
-\draw[->]             (b0) edge (b1);
-\draw[->]             (c0) edge (c1);
-\draw[->]             (d0) edge (d1);
-\draw[->]             (e0) edge (e1);
-\draw[->]             (f0) edge (f1);
-\draw[->]             (g0) edge (g1);
-\draw[->]             (h0) edge (h1);
-\draw[->]             (i0) edge (i1);
-\draw[->]             (a2) edge (a1);
-\draw[->]             (b2) edge (b1);
-\draw[->]             (c2) edge (c1);
-\draw[->]             (d2) edge (d1);
-\draw[->]             (e2) edge (e1);
-\draw[->]             (f2) edge (f1);
-\draw[->]             (g2) edge (g1);
-\draw[->]             (h2) edge (h1);
-\draw[->]             (i2) edge (i1);
-\draw[->]             (a2) edge (b2);
-\draw[->]             (c2) edge (b2);
-\draw[->, bend left]  (a2) edge (c2);
-\draw[->]             (c2) edge (d2);
-\draw[->]             (e2) edge (d2);
-\draw[->]             (e2) edge (f2);
-\draw[->]             (g2) edge (f2);
-\draw[->, bend left]  (e2) edge (g2);
-\draw[->]             (g2) edge (h2);
-\draw[->]             (i2) edge (h2);
-\end{tikzpicture}
-\end{center}
-\caption{
-The view-internal structure we use in our tests. Pictures in the dependent
-view use inter-view coding only.
-}
-\label{fig:just-inter-view}
-\end{figure}
-
-With the view-internal coding structure established, we can now turn our
-attention to the inter-view coding structure. There is little consensus in
-the literature about what inter-view structure is best. In section
-\ref{sec:results}, we propose some optimal frame structures as adduced from the
-results of our experiments.
+Note that this is approach complementary to the existing techniques described in
+in \ref{subsec:background}. Indeed, practically any search algorithm can be
+vertically constrained, and the experimental evidence we present in
+\ref{subsec:constrained} suggests that they would benefit from doing so, since
+we are taking advantage of a property of the medium, not of a particular
+algorithm. Additionally, our technique requires no modifications to be made in
+the decoder, the player, or the standard, merely in the encoder.
 
 \section{Experimental Method} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:method} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 In this section, we describe the methods we used to obtain our results.
 Subsections \ref{subsec:jmvc} and \ref{subsec:modifications} talk about the JMVC
 reference codec and the modifications we made to it in order to obtain the data
-we needed. In the process of performing those modifications, we identified a bug
-in the codec, which we describe in \ref{subsec:bug}. Finally, in
-\ref{subsec:data-set} and \ref{subsec:environment}, we talk about the data sets
-we used and the hardware and software platform we ran our tests on.
+we needed. Finally, in \ref{subsec:data-set} and \ref{subsec:environment}, we
+talk about the data set we used and the hardware and software platform we ran
+our tests on.
 
 \subsection{Codec: JMVC}
 \label{subsec:jmvc}
@@ -525,79 +237,60 @@ the simplest to reason about.
 \subsection{Our Modifications}
 \label{subsec:modifications}
 In order to gather data about the coding process, we made the following changes
-to the JMVC software:
-
-\begin{enumerate}
+to the JMVC software: \begin{compactenum}
 \item We instrumented the process of writing motion vectors to the byte-stream
 by first writing the same information in human-readable format to a text file.
 This allowed us to examine the motion vectors the codec produced and compare
 them with the motion vectors we expected.
-
 \item We inserted a timer around the process of encoding each picture, which
 allowed us to determine exactly what portion of its time JMVC was spending on
 each picture type.
-
 \item We added a parameter to the configuration file that allowed us to
 vertically constrain the motion-vector search space by a user-specified amount.
-\end{enumerate}
+\end{compactenum}
 
-\subsection{A Bug in JMVC}
-\label{subsec:bug}
 In the process of making and testing these changes to JMVC, we discovered what
-appears to be a bug in how JMVC searches the reference picture for similar
-blocks. JMVC allows the motion-vector search space to be limited to a square of
+appears to be a bug in how it searches the reference picture for similar blocks.
+The software allows the motion-vector search space to be limited to a square of
 configurable size around the dependent block. In some cases, however, this
 square goes off the edge of the picture and must be further restricted to end
-at the picture's edges.
+at the picture's edges. In the case where the square went off the top or left
+edge, JMVC did not properly constrain this square, resulting in the
+motion-vector search going out of the bounds of the array the representing the
+reference picture. The resulting garbage would occasionally yield a block that
+the encoder found similar enough, resulting in motion vectors that referred to
+blocks off the edge of the picture. We have reported this bug to the software's
+maintainers.
 
-In the case where the square went off the top or left edge, JMVC did not
-properly constrain this square, resulting in the motion-vector search going out
-of the bounds of the array the representing the reference picture. The
-resulting garbage would occasionally yield a block that the encoder found
-similar enough, resulting in motion vectors that referred to blocks off the
-edge of the picture. We have reported this bug to the software's maintainers.
-
-\begin{figure}[H]
-\centering
-\begin{subfigure}{.5\textwidth}
-\centering
-\fbox{\includegraphics[width=3in]{figures/bedroom1_view0_frame100.png}}
-\caption{View 0, frame 100 of bedroom data set.}
-\end{subfigure} \\
-\begin{subfigure}{.5\textwidth}
-\centering
-\fbox{\includegraphics[width=3in]{figures/helicopter_view0_frame100.png}}
-\caption{View 0, frame 100 of helicopter data set.}
-\end{subfigure}
-\caption{A frame from each of the two data sets we used in our tests.}
-\label{fig:data-set}
-\end{figure}
-
-\newpage
 \subsection{Data Set}
 \label{subsec:data-set}
 We ran our tests on 3D-rendered data-sets constructed specifically for testing
-multi-view coding \cite{zhang:multi}. We ran tests on two data sets: The first
-is a scene of a bedroom, in which the cameras pan horizontally across the room.
-The second depicts a helicopter landing. A frame from each data set is shown in
-Figure \ref{fig:data-set}.
+multi-view coding. We ran tests on two scenes: The first is of a bedroom, in
+which the cameras pan horizontally across the room. The second depicts a
+helicopter landing. See \cite{zhang:multi} for a description of the data set.
 
-Each view contains 300 frames. Each frame is $1280\times 720$ pixels. They are
-meant to simulate separate viewpoints, so objects visible in one view may be
-occluded in another. Our tests in \ref{subsec:optimal} and the full search in
-\ref{subsec:constrained} were run using the first 100 frames from each data-set.
-The rest of our tests used all 300 frames.
+Despite being artificial, these scenes are representative of real multiview
+scenes in that the views are rendered from different viewing angles such that
+objects in one view may be occluded or skewed in adjacent views. Unlike
+temporally separated pictures, different views cannot differ because of scene
+changes, camera or object movement, etc. In principle, occlusion and skew are
+the only causes of inter-view differences, and our data set adequately models
+these.
 
-Using constructed video streams, rather than the output of actual multiview
-cameras allows us to avoid artifacts that might occur in real footage. For
-example, the cameras might be slightly tilted or out of horizontal alignment,
-or one of the cameras might have a flawed lens, decreasing the similarity
-between views. Although these are considerations that come up in practice,
-our interest is in gathering data about the common case, where the views
-have the expected correlation.
+Meanwhile, using constructed video streams, rather than the output of actual
+multiview cameras, allows us to avoid artifacts that might occur in real
+footage. For example, the cameras might be slightly tilted or out of horizontal
+alignment, or one of the cameras might have a flawed lens. Although these are
+considerations that come up in practice, our interest is in gathering data about
+the common case, where the views have the expected correlation.
+
+Each view contains 300 frames. Each frame is $1280\times 720$ pixels. Our tests
+in \ref{subsec:optimal} and the full search in \ref{subsec:constrained} were run
+using the first 100 frames from each data-set. The rest of our tests used all
+300 frames.
 
 We performed our timing tests for vertically constrained versus unconstrained
-search using two view configurations. The first was the simplest configuration
+search using three view configurations. The first was the simplest configuration
 possible: two views in which the first is the reference view, and the second
 is dependent on the first. In addition to this, we ran tests on two eight-view
 configurations. The structures of these and what motivated us to choose them
@@ -616,40 +309,17 @@ had cache sizes of 12288KB.
 
 \section{Results} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:results} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-In this section, we present the results of our experiments and use them to make
-judgements about how best to organize view dependencies, when to use
-unidirectionally and bidirectionally coded views, and whether applying vertical
-constraints to the motion-vector search of dependent views is worthwhile. The
-former two points are discussed in subsection \ref{subsec:optimal}, while the
-latter point is motivated and discussed in subsections
-\ref{subsec:unconstrained} and \ref{subsec:constrained}, respectively.
+In this section, we present the results of our experiments. In
+\ref{subsec:optimal} we motivate the view-dependency structures that we used
+optimally in our experiments. In \ref{subsec:unconstrained} we analyze the
+behavior of JMVC's motion compensation prior to our modifications. Lastly, in
+\ref{subsec:constrained}, we show how applying vertical constraints improves
+that behavior.
 
 \subsection{Finding the Optimal View Structure}
 \label{subsec:optimal}
-From the outset, we wanted to test our constrained motion-vector search under
-two scenarios. The first was the simple case of two adjacent views,
-one depending on the other. This would let us determine the fundamental costs
-and benefits of vertical constraints in a simple, idealized scenario. The view
-structure that this scenario requires is obvious and allows for no
-optimization.
 
-It is frequently desirable to encode more than two views, however, in order to
-implement free-viewpoint video, for example, or in order to adjust the distance
-of two stereoscopic views according to the user's proximity to the screen. To
-model this scenario, we also wanted to perform tests using eight views. In this
-case, however, it is far from obvious what the best choice of view structure
-might be.
-
-Since JMVC encodes at a variable bit-rate, there are two variables to optimize
-for: bit-rate and time. In terms of time, the optimal configuration is to not
-use motion compensation at all and make every view independent. This completely
-fails to take advantage of spatial and temporal redundancies, however, and
-requires a prohibitively high bit-rate. In order to reason about what view
-structures are most computationally efficient, it is necessary to know the
-time taken by each kind of view. Figure \ref{fig:view-type-times} shows
-the average time taken to encode each view type.
-
-\begin{figure}
+\begin{figure}[h]
 \centering
 \begin{tabular}{|l|r|}
 \hline
@@ -665,33 +335,9 @@ with each data-set.}
 \label{fig:view-type-times}
 \end{figure}
 
-Independent views are a mixture of I-, P-, and B-frames. Since they use the
-internal structure described in \ref{subsec:depends}, about half of these
-are B-frames. This makes independent views slightly more expensive than
-single-reference dependent frames. It's important to note that this would not be
-the case if we were using JMVC's default view-internal frame structure, which
-structures dependent views the same as independent ones, except with I-frames
-replaced by inter-view coded frames (see \ref{subsec:depends}). In that case,
-independent frames would be the fastest to encode.
-
-The most important thing to note in Figure \ref{fig:view-type-times}, however,
-is the relationship between the time it takes to encode dependent views with one
-reference as opposed to dependent views with two. Dependent views with two
-references take nearly four times as long. This means that from the standpoint
-of computation time, bidirectional dependent views should be avoided whenever
-possible. In \ref{subsec:constrained} we discuss how constraining the search
-space can reduce this gap and make bidirectional dependent views more feasible.
-
-Finding the optimal configuration in terms of bit-rate requires that we know how
-many bits, on average, each view type takes for each possible distance from its
-reference view or views. We used our modified JMVC to acquire this data. The
-bit-rates for single-reference pictures are presented in Figure
-\ref{fig:uniframes}, and the bit-rates for two-reference pictures are given in
-Figure \ref{fig:biframes}.
-
-\begin{figure}
+\begin{figure}[h]
 \centering
-\includegraphics[scale=.68]{figures/motion_vector_data_unconstrained_unidirectional.eps}
+\includegraphics[scale=.68]{figures/motion_vector_data_unconstrained_unidirectional.pdf}
 \caption{
 Average bit-rate for dependent view with one reference by distance from the
 reference view.
@@ -699,9 +345,9 @@ reference view.
 \label{fig:uniframes}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
 \centering
-\includegraphics[scale=.68]{figures/motion_vector_data_unconstrained_bidirectional.eps}
+\includegraphics[scale=.68]{figures/motion_vector_data_unconstrained_bidirectional.pdf}
 \caption{
 Average bit-rate for dependent view with two references by distance from the
 reference views.
@@ -709,68 +355,29 @@ reference views.
 \label{fig:biframes}
 \end{figure}
 
-The first thing to notice is that the bit-rates in these figures are scaled to
-percentage of the average independent view. This means that, in Figure
-\ref{fig:uniframes} for example, once the reference view is four views away,
-it is no longer {\it ever} worthwhile to use single-reference motion
-compensation in JMVC. It it is at least as cheap to encode the view
-independently\footnote{The reader may also notice that the bit-rates are not
-quite symmetrical for forward and reverse references. I.e., the bit-rate of
-the 5-1 view is slightly larger than the one for the 1-5 view. This is an
-artifact of the way JMVC searches List0 and List1 references (the two lists
-of references for a B-frame). JMVC slightly prefers List0 motion vectors
-regardless of the closeness of the reference frames. So the 1-5 view has
-slightly more List0 references than the 5-1 view does List1 references. Since
-this is an artifact of the encoder software, we do not take it into account when
-deciding on optimal view configurations.}
+In order for us to reason about the effects of vertical search constraints, it
+was necessary to decide upon a set of view structures to use. Since the
+view dependencies could have an effect on the results of our experiments, it was
+desirable to find the configuration with the optimal tradeoff between time and
+bit-rate, on the assumption that it would be most likely to be used in
+practice. We chose to run tests with two configurations: a simple two-view one,
+and an eight-view one. In the case of a two-view configuration, the dependency
+structure is obvious and allows for no optimization. It is not so obvious what
+the optimal dependencies are when the number of views is increased to eight
+however.
 
-In Figure \ref{fig:biframes}, it's clear that frames with two references scale
-more efficiently to the distance of their reference frames. Perhaps
-surprisingly, however, a bidirectionally coded view with a distance of one from
-either of its references has at most a very slightly better bit-rate than a
-unidirectional view with a distance of one from its reference. Since it is
-nearly four times as time-consuming, on average, to use two references, this
-implies that it is probably never profitable to use a dependent view with an
-immediately adjacent references. Instead, bidirectional dependent views should
-be used to compensate for being distant from potential references on both sides,
-since they scale better to reference distance.
+Since JMVC encodes at a variable bit-rate, there are two variables to optimize
+for: bit-rate and time. Quality is fixed. Figure \ref{fig:view-type-times} shows
+the average time taken to encode each view type, and Figures \ref{fig:uniframes}
+and \ref{fig:biframes} show the average bit-rate of dependent pictures with one
+and two references respectively, as a percentage of the bit-rate of
+the average independent frame.
 
-\begin{figure}[H]
-\begin{center}
-\begin{tikzpicture}[every path/.style={>=latex},every node/.style={draw,rectangle}]
-\node            (a) at (0,0.4)  { D };
-\node            (b) at (1,0.4)  { I };
-\node            (c) at (2,0.4)  { D };
-\node            (d) at (3,0.4)  { D };
-\node            (e) at (4,0.4)  { D };
-\node            (f) at (5,0.4)  { D };
-\node            (g) at (6,0.4)  { I };
-\node            (h) at (7,0.4)  { D };
-\node[draw=none]     at (0,0)  { 0 };
-\node[draw=none]     at (1,0)  { 1 };
-\node[draw=none]     at (2,0)  { 2 };
-\node[draw=none]     at (3,0)  { 3 };
-\node[draw=none]     at (4,0)  { 4 };
-\node[draw=none]     at (5,0)  { 5 };
-\node[draw=none]     at (6,0)  { 6 };
-\node[draw=none]     at (7,0)  { 7 };
-\draw[->]             (b) edge (a);
-\draw[->]             (b) edge (c);
-\draw[->]             (c) edge (d);
-\draw[->]             (g) edge (h);
-\draw[->]             (g) edge (f);
-\draw[->]             (f) edge (e);
-\end{tikzpicture}
-\end{center}
-\caption{
-Optimal hierarchical configuration of \textbf{I}ndependent and
-\textbf{D}ependent views.
-}
-\label{fig:hierarchical}
-\end{figure}
-
-\begin{figure}[H]
-\begin{center}
+\begin{figure}[h]
+\centering
+\begin{subfigure}{.5\textwidth}
+\centering
+\resizebox{.8\textwidth}{!}{
 \begin{tikzpicture}[every path/.style={>=latex},every node/.style={draw,rectangle}]
 \node            (a) at (0,0.4)  { D };
 \node            (b) at (1,0.4)  { I };
@@ -796,54 +403,78 @@ Optimal hierarchical configuration of \textbf{I}ndependent and
 \draw[->]             (g) edge (f);
 \draw[->, bend right] (g) edge (e);
 \draw[->, bend left]  (b) edge (e);
-\end{tikzpicture}
-\end{center}
+\end{tikzpicture}}
+\caption{
+Optimal hierarchical configuration of \textbf{I}ndependent and
+\textbf{D}ependent views.
+}
+\label{fig:hierarchical}
+\end{subfigure} \\ \vspace{4pt}
+\begin{subfigure}{.5\textwidth}
+\centering
+\resizebox{.8\textwidth}{!}{
+\begin{tikzpicture}[every path/.style={>=latex},every node/.style={draw,rectangle}]
+\node            (a) at (0,0.4)  { D };
+\node            (b) at (1,0.4)  { I };
+\node            (c) at (2,0.4)  { D };
+\node            (d) at (3,0.4)  { D };
+\node            (e) at (4,0.4)  { D };
+\node            (f) at (5,0.4)  { D };
+\node            (g) at (6,0.4)  { I };
+\node            (h) at (7,0.4)  { D };
+\node[draw=none]     at (0,0)  { 0 };
+\node[draw=none]     at (1,0)  { 1 };
+\node[draw=none]     at (2,0)  { 2 };
+\node[draw=none]     at (3,0)  { 3 };
+\node[draw=none]     at (4,0)  { 4 };
+\node[draw=none]     at (5,0)  { 5 };
+\node[draw=none]     at (6,0)  { 6 };
+\node[draw=none]     at (7,0)  { 7 };
+\draw[->]             (b) edge (a);
+\draw[->]             (b) edge (c);
+\draw[->]             (c) edge (d);
+\draw[->]             (g) edge (h);
+\draw[->]             (g) edge (f);
+\draw[->]             (f) edge (e);
+\end{tikzpicture}}
 \caption{
 Optimal non-hierarchical configuration of \textbf{I}ndependent and
 \textbf{D}ependent views.
 }
+\label{fig:non-hierarchical}
+\end{subfigure}
+\caption{Optimal eight-view dependency structures}
 \label{fig:optimal}
 \end{figure}
 
-Based on this information, it seems that the optimal view configuration from the
-perspective of bit-rate uses only single reference dependencies, as illustrated
-in Figure \ref{fig:hierarchical}, which stores eight views in about $4.2$ times
-the space of a single independent view. There is one more variable to consider,
-however: It may be desirable to be able to split up the views and send just two
-of them at a time for stereoscopic video. In this case, the hierarchical
-dependencies in Figure \ref{fig:hierarchical} would mean that in order to send
-views 3 and 4, it would be necessary to send six views in total, using
-approximately $3.5$ times the bits of a single independent view.
+Although it is common practice to allow inter coding as well as inter-view
+coding in dependent views, we have avoided this in our experiments in order
+to isolate the effects of inter-view coding. Thus in our tests, an independent
+view took slightly more time to encode than a dependent view with one reference,
+because B-frames are much more time-consuming than P-frames. The most important
+thing to note in Figure \ref{fig:view-type-times}, however, is that it takes
+nearly four times as long to encode a view with two references than one with
+one.
 
-To deal with this case, we propose the alternative  configuration in Figure
-\ref{fig:optimal}, which takes up only slightly more space and would require
-that at most four views be sent to send any two views. In this case, to send
-views 3 and 4 (still the worst case) it would only be necessary to send four
-total views, using about $3.2\times$ the bits of a single independent frame.
-This is obviously more time-consuming, since B-frames take more than three times
-as muchtime to encode as P-frames. We show how this issue can be dealt with
-using vertical search constraints in \ref{subsec:constrained}. The
-non-hierarchical optimum also takes up slightly more space in total -- about 4.6
-times the bits of a single independent frame. It may be worthwhile to make this
-trade-off, however, if it makes it less costly to send the views independently.
+In Figure \ref{fig:biframes}, it's clear that frames with two references scale
+more efficiently to the distance of their reference frames. Perhaps
+surprisingly, however, a bidirectionally coded view with a distance of one from
+either of its references has at most a very slightly better bit-rate than a
+unidirectional view with a distance of one from its reference. Since it is
+nearly four times as time-consuming, on average, to use two references, it is
+hard to justify the meagre savings in bit-rate. Our vertical constraint
+technique reduces the disparity between one- and two-reference views, making
+dependent views with two references more viable.
 
-\begin{figure}[H]
-\centering
-\begin{subfigure}{.5\textwidth}
-\centering
-\includegraphics[width=3in]{figures/bedroom1-inter-mvs.eps}
-\caption{Bedroom data set}
-\label{fig:bedroom-inter-mvs}
-\end{subfigure} \\
-\begin{subfigure}{.5\textwidth}
-\centering
-\includegraphics[width=3in]{figures/helicopter-inter-mvs.eps}
-\caption{Helicopter data set}
-\label{fig:helicopter-inter-mvs}
-\end{subfigure}
-\caption{Independent view motion vectors from 2-view test of each data-set.}
-\label{fig:inter-mvs}
-\end{figure}
+Combining this information, we arrived at the two eight-view dependency
+structures in Figure \ref{fig:optimal}. Figure \ref{fig:hierarchical} has the
+smallest bit-rate possible with just two independent views, about 4.6$\times$
+that of an independent view. On the other hand it is hierarchical, meaning that
+if one wanted to send just two views (say, 1 and  6), one might need to send as
+many as four reference views as well. The structure in
+\ref{fig:non-hierarchical} takes care of this issue by having no hierarchical
+dependencies. It has a bit-rate approximately 4.2$\times$ that of an independent
+view.
 
 \subsection{Distribution of Unconstrained \\ Motion Vectors}
 \label{subsec:unconstrained}
@@ -853,116 +484,75 @@ our data sets. We then graphed those motion vectors' positions relative to the
 dependent block to show how far afield the encoder was having to look for
 satisfactory reference blocks.
 
-Figure \ref{fig:helicopter-inter-mvs} shows the inter motion vectors for the
-two-view test helicopter data-set, and \ref{fig:bedroom-inter-mvs} shows the
-same for the bedroom data-set. In both cases the motion vectors are clustered
-tightly around the location of the dependent block. In the helicopter data set,
-motion vectors are both horizontally and vertically displaced with approximately
-equal frequency. This is typical of a video with varied motion characteristics.
-(The cameras pan right and zoom in as the helicopter flies in from the upper
-right and lands.) On the other hand, the motion vectors in the bedroom scene are
-mostly located on the x-axis. In this scene, the motion is almost exclusively
-horizontal panning. \footnote{The encoder has a bias toward motion vectors
-located either directly above or below, or directly to the left or right of the
-origin. This is due to the TZ-search algorithm, which searches in a diamond
-pattern.}
-
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
 \begin{subfigure}{.5\textwidth}
 \centering
-\includegraphics[width=3in]{figures/bedroom1-inter-view-mvs.eps}
-\caption{Bedroom data set}
-\label{fig:bedroom-inter-view-mvs}
+\includegraphics[width=2.5in]{figures/helicopter-inter-mvs.pdf}
+\caption{Independent}
+\label{fig:inter-mvs}
 \end{subfigure} \\
 \begin{subfigure}{.5\textwidth}
 \centering
-\includegraphics[width=3in]{figures/helicopter-inter-view-mvs.eps}
-\caption{Helicopter data set}
-\label{fig:helicopter-inter-view-mvs}
-\end{subfigure}
-\caption{Dependent view motion vectors from 2-view test of each data-set.}
+\includegraphics[width=2.5in]{figures/helicopter-inter-view-mvs.pdf}
+\caption{Dependent}
 \label{fig:inter-view-mvs}
+\end{subfigure}
+\caption{
+Independent and dependent view motion vectors from 2-view test of the helicopter
+scene. Those from the bedroom scene are similar.
+}
+\label{fig:inter-and-inter-view-mvs}
 \end{figure}
 
-In both cases, the motion vector search does a good job of taking advantage of
-the temporal redundancy between pictures. The inter-frame motion is small enough
-that a search centered at the dependent block is able to quickly find appropriate
-motion vectors in most cases, with very few motion vectors ending up distant from
-the origin.
+Figure \ref{fig:inter-mvs} shows the inter-coded motion vectors for the two-view
+test. The motion vectors are clustered tightly around the location of the
+dependent block.\footnote{The encoder has a bias toward motion vectors located
+either directly above or below, or directly to the left or right of the origin.
+This is due to the TZ-search algorithm, which searches in a diamond pattern, not
+the content of the video.} In the inter-coded case, the motion vector search
+does a good job of taking advantage of the temporal redundancy between
+pictures. The inter-frame motion is small enough that a search centered at the
+dependent block is able to quickly find appropriate motion vectors in most
+cases, with very few motion vectors ending up distant from the origin.
 
 Figure \ref{fig:inter-view-mvs} shows the motion vectors the unmodified JMVC
-software produced for the dependent views of the same test. As in the case
-of the inter motion compensation in the bedroom data set, the motion vectors
-show a tendency to cluster around the x-axis. This reflects the fact that the
-reference is horizontally offset from the dependent view. The motion vectors
-are much more scattered, however.
-
-Here the diamond refinement used by TZ-search does not do as efficient a job of
-finding appropriate motion vectors. This can be attributed to two factors:
-First, the ``right'' inter-view reference block according to the view
+software produced for the dependent views of the same test. In contrast to the
+inter-coded motion vectors, these are much more widely distributed, although
+they tend to hug the x-axis. This can be attributed to two factors:
+\begin{compactenum}
+\item The ``right'' inter-view reference block according to the view
 differential is farther away, horizontally, than is common for inter motion
-vectors. This explains why TZ-search comes up with less well clustered motion
-vectors in this case that it does for the inter-coded motion vectors in
-bedroom data set.
+vectors. This explains the increased horizontal spread.
+\item The diamond refinement spends a lot of time looking at points off
+the x-axis. Sometimes, it even finds a reference block that is ``good enough''
+in a vertically offset position. This explains the increased vertical spread.
+\end{compactenum} Note that the latter behavior is pathological: Except in the
+case of occlusions and skew, {\it the best inter-view motion vector is always
+horizontally, not vertically displaced.}
 
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
-\begin{subfigure}{.5\textwidth}
-\centering
-\includegraphics[width=3in]{figures/bedroom1-inter-view-bimvs1.eps}
-\caption{Bedroom data set}
-\label{fig:bedroom-inter-view-bimvs1}
-\end{subfigure} \\
-\begin{subfigure}{.5\textwidth}
-\centering
-\includegraphics[width=3in]{figures/helicopter-inter-view-bimvs1.eps}
-\caption{Helicopter data set}
-\label{fig:helicopter-inter-view-bimvs1}
-\end{subfigure}
-\caption{Dependent view bidirectional motion vectors from 8-view test of each
-data-set.}
+\includegraphics[width=2.5in]{figures/helicopter-inter-view-bimvs1.pdf}
+\caption{
+Dependent view bidirectional motion vectors from 8-view test of the
+helicopter data set.
+}
 \label{fig:inter-view-bimvs1}
 \end{figure}
 
-\newpage
-Second, the diamond refinement spends a lot of time looking at points off
-the x-axis. Sometimes, it even finds a reference block that is ``good enough''
-in a vertically offset position. Nonetheless, because of the correlation between
-views, {\it the best inter-view motion vector is always horizontally displaced,
-except in the case of occlusions.} That means that conceptually, the only case in
-which searching for inter-view reference blocks off the x-axis is useful is when
-an object has been occluded, which accounts for relatively few blocks in most
-frames.
-
-Figure \ref{fig:inter-view-bimvs1} shows similar data for two of the
-two-reference views of the non-hierarchical 8-view test. Again, there are a few
-motion vectors that lie significantly off the x-axis, but by far the most reflect
-the horizontal view offset. Notice that the motion vectors that lie on the x-axis
-are centered farther from the origin than they are in \ref{fig:inter-view-mvs}.
-This is consistent with the idea that they correspond to view offset, in this
-case a greater offset than in \ref{fig:inter-view-mvs}.
+Figure \ref{fig:inter-view-bimvs1} shows similar data for two of the dependent
+two-reference view of the non-hierarchical 8-view test. Again, there are a few
+motion vectors that lie significantly off the x-axis, but by far the most
+reflect the horizontal view offset. Notice that the motion vectors that lie on
+the x-axis are centered farther from the origin than they are in
+\ref{fig:inter-view-mvs}. This is consistent with the idea that they correspond
+to view offset, in this case a greater offset than in \ref{fig:inter-view-mvs}.
 
 \subsection{Benefits of Vertical Constraint}
 \label{subsec:constrained}
-Inspecting the dependent and reference blocks corresponding to motion vectors
-that do not lie on the x-axis, we found that there are two primary reasons these
-unexpected motion vectors occur: \begin{compactitem}
-\item Some objects, such as the helicopter's shadow as the tree in the helicopter
-data set as the camera zooms in, are visible in some views while not being visible
-in others. Keeping view-dependencies adjacent minimizes this, but it still occurs.
-In this case, allowing motion vectors that aren't on the x-axis can be useful,
-since some other block might be a close-enough match.
-\item Some blocks are general enough that they have close matches in many blocks
-of the reference picture. For example, a section of bedroom wall looks very much
-like every other section of bedroom wall. In this case, allowing motion vectors
-off of the x-axis is probably not useful; even if the search algorithm happens
-to find a vertically offset motion vector, it would likely be able to find one
-with no vertical offset as well. \end{compactitem} Under the assumption that the
-former case is relatively rare, we propose constraining the motion vector search
-to the x-axis.
 
-\begin{figure}[H]
+\begin{figure}[h]
 \centering\small
 \begin{tabular}{|l|l|l|l|l|}
 \multicolumn{1}{c}{} & \multicolumn{2}{c}{unconstrained} & \multicolumn{2}{c}{constrained} \\ \hline
@@ -975,6 +565,42 @@ TZ-search            & 21136.80        & 2.72            & 22551.12        & 1.4
 \label{fig:time-full-fast}
 \end{figure}
 
+Inspecting the dependent and reference blocks corresponding to motion vectors
+that do not lie on the x-axis, we found that there are two primary reasons these
+unexpected motion vectors occur: \begin{compactitem}
+\item Some objects, such as the helicopter's shadow in the helicopter data set
+as the camera zooms in, are visible in some views while not being visible in
+others. Keeping view-dependencies adjacent minimizes this, but it still occurs.
+In this case, allowing motion vectors that aren't on the x-axis can be useful,
+since some other block might be a close-enough match.
+\item Some blocks are general enough that they have close matches in many blocks
+of the reference picture. For example, a section of bedroom wall looks very much
+like every other section of bedroom wall. In this case, allowing motion vectors
+off of the x-axis is probably not useful; even if the search algorithm happens
+to find a vertically offset motion vector, it would likely be able to find one
+with no vertical offset as well. \end{compactitem} Under the assumption that the
+former case is relatively rare, we hypothesized that constraining the motion
+vector search to the x-axis would have little effect on bit-rate.
+
+\begin{figure}[h]
+\centering
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[width=2.5in]{figures/bedroom1-inter-view-constrained-mvs.pdf}
+\caption{Bedroom data set}
+\label{fig:bedroom-inter-view-constrained-mvs}
+\end{subfigure} \\
+\begin{subfigure}{.5\textwidth}
+\centering
+\includegraphics[width=2.5in]{figures/helicopter-inter-view-constrained-mvs.pdf}
+\caption{Helicopter data set}
+\label{fig:helicopter-inter-view-constrained-mvs}
+\end{subfigure}
+\caption{Constrained unidirectional dependent view motion vectors from 2-view
+test of each data-set.}
+\label{fig:inter-view-constrained-mvs}
+\end{figure}
+
 Figure \ref{fig:time-full-fast} shows the time and bits required to encode each
 frame using the full and TZ-search algorithms with and without vertical
 constraint, and Figure \ref{fig:inter-view-constrained-mvs} shows the
@@ -984,55 +610,15 @@ alone, even when it is accompanied by the exhaustive full search algorithm.
 Using vertical constraints and TZ-search together produces a speedup of
 approximately $47\%$ over using TZ-search alone.
 
-On the other hand, this speedup comes at the cost of a slightly higher bit-rate
+This speedup comes at the cost of a higher bit-rate, but only very slightly
 -- in the case of the TZ-search, about a $6.7\%$ increase. This increase in
 bit-rate is present even when the full search is used, which implies that these
 blocks simply have no matching references on the x-axis. That is, it seems that
 about $6$--$7\%$ of the blocks are occluded between these two adjacent views.
 
-Figure \ref{fig:time-constrained} contains the times and bit-rates required
-to encode each frame of the dependent views of the 8-view hierarchical test.
-Views 0, 2, 5, and 7 each have one reference, whereas views 3 and 4 each have
-two. Figure \ref{fig:inter-view-constrained-bimvs1} shows the distribution of
-motion vectors in view 3.
-
-For the one-reference views, speedups range from $42.3\%$ (bedroom, view 5) to
-$52.4\%$ (helicopter, view 0). For the two-reference views, the
-constrained version uniformly achieves speedups of about $75\%$. This large
-decrease in the time taken to encode bidirectionally coded views serves to
-make them more usable in practice: Without vertical constraints, a
-two-reference view takes five times as long as a one reference view, and
-probably isn't worth the cost in most cases. On the other hand, with vertical
-constraints, they now take only twice as long, so the trade-off may be worth it.
-
-The penalty in bit-rate varies widely, but in no case is it worse than than a
-$2.9\%$ increase, and in most cases it is much less. In fact in one case
-(bedroom, view 4), the bit-rate actually decreases in the constrained version.
-This implies that whether and by how much the bit-rate will increase is highly
-dependent on content.
-
-\begin{figure}[H]
-\centering
-\begin{subfigure}{.5\textwidth}
-\centering
-\includegraphics[width=3in]{figures/bedroom1-inter-view-constrained-mvs.eps}
-\caption{Bedroom data set}
-\label{fig:bedroom-inter-view-constrained-mvs}
-\end{subfigure} \\
-\begin{subfigure}{.5\textwidth}
-\centering
-\includegraphics[width=3in]{figures/helicopter-inter-view-constrained-mvs.eps}
-\caption{Helicopter data set}
-\label{fig:helicopter-inter-view-constrained-mvs}
-\end{subfigure}
-\caption{Constrained unidirectional dependent view motion vectors from 2-view
-test of each data-set.}
-\label{fig:inter-view-constrained-mvs}
-\end{figure}
-
-\begin{figure}[H]
+\begin{figure}[h]
 \centering\small
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.4\textwidth}
 \centering
 \begin{tabular}{|l|l|l|l|l|l|}
 \multicolumn{2}{c}{} & \multicolumn{2}{c}{unconstrained} & \multicolumn{2}{c}{constrained} \\ \hline
@@ -1047,7 +633,7 @@ view & num. refs.    & bits            & secs.           & bits            & sec
 \caption{Bedroom data set}
 \label{fig:bedroom-time-constrained}
 \end{subfigure} \\
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.4\textwidth}
 \centering
 \begin{tabular}{|l|l|l|l|l|l|}
 \multicolumn{2}{c}{} & \multicolumn{2}{c}{unconstrained} & \multicolumn{2}{c}{constrained} \\ \hline
@@ -1068,17 +654,23 @@ included, since we did not constrain the inter motion-vector search.}
 \label{fig:time-constrained}
 \end{figure}
 
-\begin{figure}[H]
+Figure \ref{fig:time-constrained} contains the times and bit-rates required
+to encode each frame of the dependent views of the 8-view hierarchical test.
+Views 0, 2, 5, and 7 each have one reference, whereas views 3 and 4 each have
+two. Figure \ref{fig:inter-view-constrained-bimvs1} shows the distribution of
+motion vectors in view 3.
+
+\begin{figure}[h]
 \centering
 \begin{subfigure}{.5\textwidth}
 \centering
-\includegraphics[width=3in]{figures/bedroom1-inter-view-constrained-bimvs1.eps}
+\includegraphics[width=2.5in]{figures/bedroom1-inter-view-constrained-bimvs1.pdf}
 \caption{Bedroom data set}
 \label{fig:bedroom-inter-view-constrained-bimvs1}
-\end{subfigure} \\
+\end{subfigure} \hspace{4pt}
 \begin{subfigure}{.5\textwidth}
 \centering
-\includegraphics[width=3in]{figures/helicopter-inter-view-constrained-bimvs1.eps}
+\includegraphics[width=2.5in]{figures/helicopter-inter-view-constrained-bimvs1.pdf}
 \caption{Helicopter data set}
 \label{fig:helicopter-inter-view-constrained-bimvs1}
 \end{subfigure}
@@ -1086,33 +678,45 @@ included, since we did not constrain the inter motion-vector search.}
 of the hierarchical 8-view test.}
 \label{fig:inter-view-constrained-bimvs1}
 \end{figure}
-   
+
+For the one-reference views, speedups range from $42.3\%$ (bedroom, view 5) to
+$52.4\%$ (helicopter, view 0). For the two-reference views, the
+constrained version uniformly achieves speedups of about $75\%$. This large
+decrease in the time taken to encode bidirectionally coded views serves to
+make them more usable in practice: Without vertical constraints, a
+two-reference view takes five times as long as a one reference view, and
+probably isn't worth the cost in most cases. On the other hand, with vertical
+constraints, they now take only twice as long, so the trade-off may be worth it.
+
+The penalty in bit-rate varies, but in no case is it worse than than a
+$2.9\%$ increase, and in most cases it is much less. In fact in one case
+(bedroom, view 4), the bit-rate actually decreases in the constrained version.
+This implies that whether and by how much the bit-rate will increase is highly
+dependent on content.
+
 \section{Conclusion} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:conclusion} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 This paper has two main goals: \begin{compactenum}
-\item \label{itm:fst} To provide a systematic characterization of view
+\item \label{itm:fst} To propose and examine the usefulness of vertical
+constraints on inter-view motion-vector search; and
+\item \label{itm:snd} To provide an experimental characterization of view
 dependencies, with an eye toward arriving at an optimal dependency structure for
-multiview video; and
-\item \label{itm:snd} To examine the usefulness of applying vertical constraints
-to inter-view motion-vector search. \end{compactenum}
+multiview video. \end{compactenum}
 
-With respect to \ref{itm:fst}, we have provided timing data for each view type,
-averaged over several trials and two data sets, and bit-rate data for each
-dependent view type, categorized by their distances from their reference views.
-Based on this data, we presented two optimal view dependency structures: a
-hierarchical one with minimal bit-rate overall and a non-hierarchical one to
-make it cheaper to transmit a subset of the views. Lastly, we demonstrated that
-bidirectionally coded views can scale more effectively to view distance but
-come at a hefty cost in time. Fortunately, vertically constraining inter-view
-motion vectors can drastically reduce the time they take, making them more
-practical.
-
-With respect to \ref{itm:snd}, using vertical constraints can provide
+With respect to \ref{itm:fst}, using vertical constraints can provide
 significant speedups with a small increase in bit-rate, due to occlusions. 
 In particular, they provide about a four-times speedup for bidirectionally
 coded views. The speedup they provide is large enough that this could be a
 reasonable trade-off, especially for time-sensitive applications, like streaming
 video.
+
+With respect to \ref{itm:snd}, we have provided timing data for each view type,
+averaged over several trials and two data sets, and bit-rate data for each
+dependent view type, categorized by their distances from their reference views.
+We demonstrated that bidirectionally coded views can scale more effectively to
+view distance but come at a hefty cost in time. Fortunately, vertically
+constraining inter-view motion vectors can drastically reduce the time they
+take, making them more practical.
 
 \balance
 \bibliographystyle{abbrv}
