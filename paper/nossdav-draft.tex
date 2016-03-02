@@ -24,13 +24,12 @@
 \numberofauthors{1}
 \author{
 \alignauthor
-Double-Blind Review
-%Ben Hamlin, Wu-chi Feng\\
-%       \affaddr{Portland State University}\\
-%       \affaddr{Department of Computer Science}\\
-%       \affaddr{P.O. Box 751}\\
-%       \affaddr{Portland, OR 97207}\\
-%       \email{<hamlinb> <wuchi>@cs.pdx.edu}
+Ben Hamlin, Wu-chi Feng\\
+       \affaddr{Portland State University}\\
+       \affaddr{Department of Computer Science}\\
+       \affaddr{P.O. Box 751}\\
+       \affaddr{Portland, OR 97207}\\
+       \email{<hamlinb> <wuchi>@cs.pdx.edu}
 }
 
 \maketitle
@@ -40,16 +39,15 @@ Multiview video coding is an important technology for enabling streaming
 stereoscopic video, among other applications. However, encoding multiple
 views into one stream compounds the size and computation overhead of
 traditional video coding. Because of this, there is a need to come up with new
-ways to improve the space-time trade-off inherent in motion compensation
-specialized for multiview. In this paper, we present and evaluate a simple
-method to reduce the time-overhead of inter-view motion compensation by
-constraining the search space vertically, leveraging knowledge of the
-relationship between views. We show that this technique, which is
-complementary to existing approaches, reduces the time taken by inter-view
-motion compensation by a factor of two for views with one reference and a factor
-of four for views with two references, with at most a small increase in
-bit-rate. In addition, we provide an experimental analysis of view-dependency
-structures in multiview video.
+ways to improve the space-time trade-off inherent in multiview motion
+compensation. In this paper, we present and evaluate a method to reduce the
+time-overhead of inter-view motion compensation by constraining the search space
+vertically, leveraging knowledge of the relationship between views. We show that
+this technique, which is complementary to existing approaches, reduces the time
+taken by inter-view motion compensation by a factor of two for views with one
+reference and a factor of four for views with two references, with at most a
+small increase in bit-rate. In addition, we provide an experimental analysis of
+view-dependency structures in multiview video.
 \end{abstract}
 
 \begin{CCSXML}
@@ -85,7 +83,7 @@ that the combined views can be encoded more efficiently together than they could
 be individually. The mechanism used to exploit inter-picture redundancy in
 ITU/ISO H.264/MPEG4 AVC and Annex H, its multiview extension, is block-based
 motion compensation. The most expensive aspect of this is motion-vector search,
-and a variety of algorithms for it exist, many of which acheive impressive
+and a variety of algorithms for it exist, many of which achieve impressive
 results (a survey of existing algorithms is presented in \cite{khattak:fast}).
 
 The novel approach we explore in this paper uses knowledge about the constrained
@@ -93,8 +91,8 @@ set of ways in which the pictures (in this case, the views) can differ from each
 other in order to narrow down the possibilities before searching. Specifically,
 in the common case for multiview, the cameras shooting the different views are
 located in the same horizontal plane. This means that objects that are
-non-occluded in both views will have different x-coordinates, but should not
-have different y-coordinates. Thus we propose constraining the inter-view
+non-occluded in both views will have different x-coordinates, but should
+have similar y-coordinates. Thus, we propose constraining the inter-view
 motion-vector search to consider only horizontal motion-vector offsets, not
 vertical ones.
 
@@ -102,7 +100,7 @@ Although the technique we propose is simple, it is an approach that has not, to
 our knowledge, been examined in the literature, and it is not implemented in any
 of the encoders we examined. Thus we feel that it is reasonable to ask whether
 intuition -- that vertical constraint will reduce computation time without
-significantly impacting quality or bit rate -- is borne out. We do so in this
+significantly impacting quality or bit-rate -- is borne out. We do so in this
 paper, supporting our claim with experimental evidence. Our experiments produced
 approximately a two-times speedup for views with one reference and about a
 four-times speedup for views with two references, over using a fast search
@@ -119,13 +117,14 @@ variety of view-dependency structures, arriving at a suggestion for an optimal
 and bidirectional inter-view dependencies are useful. \end{compactitem} To our
 knowledge, this is the first paper to explore vertically constraining inter-view
 motion compensation. For a summary of previous work on establishing optimal
-view-dependency structures, the reader is refered to \cite{merkle:efficient}.
+view-dependency structures, the reader is referred to \cite{merkle:efficient}.
 
 The remainder of this paper is organized as follows: In section
 \ref{sec:algorithm} we discuss how we implemented vertical motion vector
-constraint. We describe our results and the experimental methods we used to
-obtain them in sections \ref{sec:results} and \ref{sec:method}, respectively.
-Finally, in section \ref{sec:conclusion} we conclude the paper.
+constraint. We describe the experimental methods we used to evaluate our
+technique and the results we achieved in sections \ref{sec:method} and
+\ref{sec:results}, respectively. Finally, in section \ref{sec:conclusion} we
+conclude the paper.
 
 \section{Algorithm} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:algorithm} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -140,15 +139,12 @@ describe and motivate our technique for vertical search constraints.
 
 \subsection{Motion Compensation}
 \label{subsec:background}
-
 Block-based motion compensation is a technique for reducing redundancies in two
 pictures by encoding some or all of one with reference to the other. H.264 uses
 a method similar to JPEG for encoding independent pictures. Pictures are divided
 into blocks of varying sizes, each of which is transformed into the frequency
 domain and stored as a set of coefficients to horizontally and vertically
-oriented sinusoidal functions. These coefficients can then be quantized
-to reduce the image's quality in ways that are difficult for the human eye to
-perceive.
+oriented sinusoidal functions.
 
 Once the block sizes have been chosen for a dependent picture, the reference
 picture is searched for similar blocks of the same size at quarter-pixel
@@ -163,8 +159,8 @@ also independently code blocks for which no match is found or {\it skip} blocks
 that are identical to the reference picture.
 
 Note that the standard does not specify how the search for motion vectors should
-occur, only how the result should be encoded. Since it is generally the most
-time-consuming part of the video coding process, encoders use a number of
+occur, only how the result should be encoded. Since this search is generally the
+most time-consuming part of the video coding process, encoders use a number of
 methods to narrow down the search space. The first and most obvious is to limit
 the search radius. Another approach (called {\it raster search}) is to reduce
 the resolution of the search, so that only one block is searched per fixed-size
@@ -193,21 +189,22 @@ which an object can be in one view but not in another is when it is occluded or
 too skewed to be visually similar. It is this insight that leads us to propose
 vertically constraining motion-vector search.
 
-Our modifications to the encoding process are made quite simple by the fact that
-practically every encoder already constrains the neighborhood in which motion
-vectors are searched for. They typically specify a square around the original
-block to search (e.g., $64\times 64$ pixels). Their search algorithm is usually
-idenrical for inter and inter-view search. Our modification requires the encoder
-to distinguish between the two types of motion compensation and, in the latter
-case, reduce this neighborhood in the y-direction (e.g. to $64\times 1$ pixels).
+Our modifications to the encoding process are made quite straightforward by the
+fact that practically every encoder already constrains the neighborhood in which
+motion vectors are searched for. They typically specify a square around the
+original block to search (e.g., $64\times 64$ pixels). Their search algorithm is
+usually identical for inter and inter-view search. Our modification requires the
+encoder to distinguish between the two types of motion compensation and, in the
+latter case, reduce this neighborhood in the y-direction (e.g. to $64\times 1$
+pixels).
 
-Note that this is approach complementary to the existing techniques described in
+Note that this approach is complementary to the existing techniques described in
 in \ref{subsec:background}. Indeed, practically any search algorithm can be
 vertically constrained, and the experimental evidence we present in
 \ref{subsec:constrained} suggests that they would benefit from doing so, since
-we are taking advantage of a property of the medium, not of a particular
-algorithm. Additionally, our technique requires no modifications to be made in
-the decoder, the player, or the standard, merely in the encoder.
+we are taking advantage of a property of the camer placement, not of a
+particular algorithm. Additionally, our technique requires no modifications to
+be made in the decoder, the player, or the standard, merely in the encoder.
 
 \section{Experimental Method} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:method} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -218,8 +215,8 @@ we needed. Finally, in \ref{subsec:data-set} and \ref{subsec:environment}, we
 talk about the data set we used and the hardware and software platform we ran
 our tests on.
 
-\subsection{Codec: JMVC}
-\label{subsec:jmvc}
+\subsection{Codec: JMVC} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{subsec:jmvc} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 JMVC is the H.264 MVC reference codec \cite{schwarz:jmvc}. It is adapted from
 JM \cite{suehring:jm}, the MPEG4/H.264 AVC reference codec, and contains a
 complete implementation of the H.264 multiview extensions.
@@ -236,8 +233,8 @@ between blocks for motion compensation: sum of absolute differences (SAD); sum
 of squared errors (SSE); or Hadamard. We used SAD for our tests, since it is
 the simplest to reason about.
 
-\subsection{Our Modifications}
-\label{subsec:modifications}
+\subsection{Our Modifications} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{subsec:modifications} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 In order to gather data about the coding process, we made the following changes
 to the JMVC software: \begin{compactenum}
 \item We instrumented the process of writing motion vectors to the byte-stream
@@ -264,9 +261,9 @@ the encoder found similar enough, resulting in motion vectors that referred to
 blocks off the edge of the picture. We have reported this bug to the software's
 maintainers.
 
-\subsection{Data Set}
-\label{subsec:data-set}
-We ran our tests on 3D-rendered data-sets constructed specifically for testing
+\subsection{Data Set} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{subsec:data-set} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+We ran our tests on 3D-rendered data sets constructed specifically for testing
 multi-view coding. We ran tests on two scenes: The first is of a bedroom, in
 which the cameras pan horizontally across the room. The second depicts a
 helicopter landing. See \cite{zhang:multi} for a description of the data set.
@@ -288,7 +285,7 @@ the common case, where the views have the expected correlation.
 
 Each view contains 300 frames. Each frame is $1280\times 720$ pixels. Our tests
 in \ref{subsec:optimal} and the full search in \ref{subsec:constrained} were run
-using the first 100 frames from each data-set. The rest of our tests used all
+using the first 100 frames from each data set. The rest of our tests used all
 300 frames.
 
 We performed our timing tests for vertically constrained versus unconstrained
@@ -298,8 +295,8 @@ is dependent on the first. In addition to this, we ran tests on two eight-view
 configurations. The structures of these and what motivated us to choose them
 are described in \ref{subsec:optimal}.
 
-\subsection{Testing Environment}
-\label{subsec:environment}
+\subsection{Testing Environment} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{subsec:environment} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 All of our tests were performed on Red Hat Enterprise Linux version 4.1.2-54
 using the SMP build of kernel version 2.6.18-371.6.1.el5. We encoded the YUV
 files we used as input to JMVC using ffmpeg version 0.6.5. We compiled JMVC
@@ -318,8 +315,8 @@ behavior of JMVC's motion compensation prior to our modifications. Lastly, in
 \ref{subsec:constrained}, we show how applying vertical constraints improves
 that behavior.
 
-\subsection{Finding the Optimal View Structure}
-\label{subsec:optimal}
+\subsection{Finding the Optimal View Structure} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{subsec:optimal} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[h]
 \centering
@@ -333,7 +330,7 @@ dependent, 2 references & 1339.34                      \\
 \hline
 \end{tabular}
 \caption{Time to encode 100 frames of each view type averaged over 10 trials
-with each data-set.}
+with each data set.}
 \label{fig:view-type-times}
 \end{figure}
 
@@ -360,7 +357,7 @@ reference views.
 In order for us to reason about the effects of vertical search constraints, it
 was necessary to decide upon a set of view structures to use. Since the
 view dependencies could have an effect on the results of our experiments, it was
-desirable to find the configuration with the optimal tradeoff between time and
+desirable to find the configuration with the optimal trade off between time and
 bit-rate, on the assumption that it would be most likely to be used in
 practice. We chose to run tests with two configurations: a simple two-view one,
 and an eight-view one. In the case of a two-view configuration, the dependency
@@ -407,10 +404,10 @@ the average independent frame.
 \draw[->, bend left]  (b) edge (e);
 \end{tikzpicture}}
 \caption{
-Optimal hierarchical configuration of \textbf{I}ndependent and
+Optimal non-hierarchical configuration of \textbf{I}ndependent and
 \textbf{D}ependent views.
 }
-\label{fig:hierarchical}
+\label{fig:non-hierarchical}
 \end{subfigure} \\ \vspace{4pt}
 \begin{subfigure}{.5\textwidth}
 \centering
@@ -440,10 +437,10 @@ Optimal hierarchical configuration of \textbf{I}ndependent and
 \draw[->]             (f) edge (e);
 \end{tikzpicture}}
 \caption{
-Optimal non-hierarchical configuration of \textbf{I}ndependent and
+Optimal hierarchical configuration of \textbf{I}ndependent and
 \textbf{D}ependent views.
 }
-\label{fig:non-hierarchical}
+\label{fig:hierarchical}
 \end{subfigure}
 \caption{Optimal eight-view dependency structures}
 \label{fig:optimal}
@@ -458,13 +455,13 @@ thing to note in Figure \ref{fig:view-type-times}, however, is that it takes
 nearly four times as long to encode a view with two references than one with
 one.
 
-In Figure \ref{fig:biframes}, it's clear that frames with two references scale
+In Figure \ref{fig:biframes}, it is clear that frames with two references scale
 more efficiently to the distance of their reference frames. Perhaps
 surprisingly, however, a bidirectionally coded view with a distance of one from
 either of its references has at most a very slightly better bit-rate than a
 unidirectional view with a distance of one from its reference. Since it is
 nearly four times as time-consuming, on average, to use two references, it is
-hard to justify the meagre savings in bit-rate. Our vertical constraint
+hard to justify the meager savings in bit-rate. Our vertical constraint
 technique reduces the disparity between one- and two-reference views, making
 dependent views with two references more viable.
 
@@ -478,8 +475,8 @@ many as four reference views as well. The structure in
 dependencies. It has a bit-rate approximately 4.2$\times$ that of an independent
 view.
 
-\subsection{Distribution of Unconstrained \\ Motion Vectors}
-\label{subsec:unconstrained}
+\subsection{Distribution of Unconstrained \\ Motion Vectors} %%%%%%%%%%%%%%%%%%%
+\label{subsec:unconstrained} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 In order to determine how well the existing motion-vector search was performing,
 we modified JMVC to print out each of the motion vectors it produced for each of
 our data sets. We then graphed those motion vectors' positions relative to the
@@ -529,9 +526,9 @@ vectors. This explains the increased horizontal spread.
 \item The diamond refinement spends a lot of time looking at points off
 the x-axis. Sometimes, it even finds a reference block that is ``good enough''
 in a vertically offset position. This explains the increased vertical spread.
-\end{compactenum} Note that the latter behavior is pathological: Except in the
-case of occlusions and skew, {\it the best inter-view motion vector is always
-horizontally, not vertically displaced.}
+\end{compactenum} Note that in the common case, the latter behavior is
+pathological: Discounting occlusions, the best inter-view motion vector should
+be horizontally, not vertically displaced.
 
 \begin{figure}[h]
 \centering
@@ -551,18 +548,18 @@ the x-axis are centered farther from the origin than they are in
 \ref{fig:inter-view-mvs}. This is consistent with the idea that they correspond
 to view offset, in this case a greater offset than in \ref{fig:inter-view-mvs}.
 
-\subsection{Benefits of Vertical Constraint}
-\label{subsec:constrained}
+\subsection{Benefits of Vertical Constraint} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{subsec:constrained} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[h]
 \centering\small
-\begin{tabular}{|l|l|l|l|l|}
+\begin{tabular}{|l|r|r|r|r|}
 \multicolumn{1}{c}{} & \multicolumn{2}{c}{unconstrained} & \multicolumn{2}{c}{constrained} \\ \hline
 algorithm            & bits            & secs.           & bits            & secs.         \\ \hline
 full                 & 20935.92        & 142.58          & 22488.00        & 2.37          \\ \hline
 TZ-search            & 21136.80        & 2.72            & 22551.12        & 1.43          \\ \hline
 \end{tabular}
-\caption{Seconds and bits per encoded frame of the dependent view of the
+\caption{Average seconds and bits per encoded frame of the dependent view of the
 2-view test using full and TZ-search (100 frames).}
 \label{fig:time-full-fast}
 \end{figure}
@@ -599,13 +596,13 @@ vector search to the x-axis would have little effect on bit-rate.
 \label{fig:helicopter-inter-view-constrained-mvs}
 \end{subfigure}
 \caption{Constrained unidirectional dependent view motion vectors from 2-view
-test of each data-set.}
+test of each data set.}
 \label{fig:inter-view-constrained-mvs}
 \end{figure}
 
-Figure \ref{fig:time-full-fast} shows the time and bits required to encode each
-frame using the full and TZ-search algorithms with and without vertical
-constraint, and Figure \ref{fig:inter-view-constrained-mvs} shows the
+Figure \ref{fig:time-full-fast} shows the time and bits required on average to
+encode each frame using the full and TZ-search algorithms with and without
+vertical constraint, and Figure \ref{fig:inter-view-constrained-mvs} shows the
 distribution of the constrained motion vectors using TZ-search. Using the
 vertical constraint produces shorter encoding times than using the TZ-search
 alone, even when it is accompanied by the exhaustive full search algorithm.
@@ -622,7 +619,7 @@ about $6$--$7\%$ of the blocks are occluded between these two adjacent views.
 \centering\small
 \begin{subfigure}{.4\textwidth}
 \centering
-\begin{tabular}{|l|l|l|l|l|l|}
+\begin{tabular}{|l|l|r|r|r|r|}
 \multicolumn{2}{c}{} & \multicolumn{2}{c}{unconstrained} & \multicolumn{2}{c}{constrained} \\ \hline
 view & num. refs.    & bits            & secs.           & bits            & secs.         \\ \hline
 0    & 1             & 17503.73        & 2.74            & 17806.24        & 1.45          \\ \hline
@@ -637,7 +634,7 @@ view & num. refs.    & bits            & secs.           & bits            & sec
 \end{subfigure} \\
 \begin{subfigure}{.4\textwidth}
 \centering
-\begin{tabular}{|l|l|l|l|l|l|}
+\begin{tabular}{|l|l|r|r|r|r|}
 \multicolumn{2}{c}{} & \multicolumn{2}{c}{unconstrained} & \multicolumn{2}{c}{constrained} \\ \hline
 view & num. refs.    & bits            & secs.           & bits            & secs.         \\ \hline
 0    & 1             & 35027.17        & 2.82            & 35299.28        & 1.34          \\ \hline
@@ -656,11 +653,11 @@ included, since we did not constrain the inter motion-vector search.}
 \label{fig:time-constrained}
 \end{figure}
 
-Figure \ref{fig:time-constrained} contains the times and bit-rates required
-to encode each frame of the dependent views of the 8-view hierarchical test.
-Views 0, 2, 5, and 7 each have one reference, whereas views 3 and 4 each have
-two. Figure \ref{fig:inter-view-constrained-bimvs1} shows the distribution of
-motion vectors in view 3.
+Figure \ref{fig:time-constrained} contains the average times and bit-rates
+required to encode each frame of the dependent views of the 8-view hierarchical
+test. Views 0, 2, 5, and 7 each have one reference, whereas views 3 and 4 each
+have two. Figure \ref{fig:inter-view-constrained-bimvs1} shows the distribution
+of motion vectors in view 3.
 
 \begin{figure}[h]
 \centering
